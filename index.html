@@ -10,47 +10,118 @@
         body { background-color: #f8fafc; font-family: 'Poppins', 'Noto Sans Kannada', sans-serif; }
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover; background-position: center; padding: 60px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
+            background-size: cover; background-position: center; padding: 40px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
         }
-        .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; }
+        .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; }
         .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
-        #loading { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; text-align: center; font-weight: bold; z-index: 40; display: none; }
+        .order-history-card { background: #fdfdfd; border-left: 4px solid #10b981; margin-bottom: 0.5rem; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="loading">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
-        <p class="text-green-800 font-bold">Loading Your Selection...</p>
+        <div class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
+            <p class="text-green-800 font-bold">Loading V.S. Mart...</p>
+        </div>
     </div>
 
     <header class="hero-section">
         <h1 class="text-3xl font-bold uppercase">V.S. Vegetable Mart</h1>
-        <p class="text-xl text-green-400 font-bold"> Gandhi Chowka, Devanahalli</p>
+        <p class="text-xl text-green-400 font-bold mb-1">9980764852</p>
+        <p class="text-sm opacity-80">Gandhi Chowka, Devanahalli</p>
     </header>
 
     <main class="max-w-6xl mx-auto px-4">
+        <section class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-700 mb-2">Order History / ಹಿಂದಿನ ಆರ್ಡರ್‌ಗಳು</h3>
+            <div class="flex gap-2">
+                <input type="tel" id="search_phone" placeholder="Enter Mobile Number" class="flex-1 p-2 border rounded-lg outline-none focus:ring-1 focus:ring-green-500">
+                <button onclick="fetchHistory()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm">Find</button>
+            </div>
+            <div id="history-results" class="mt-4 max-h-48 overflow-y-auto hidden"></div>
+        </section>
+
         <div id="shop-container"></div>
 
-        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto mb-10 text-center">
-            <h2 class="text-xl font-bold text-green-900 mb-4">Complete Your Order</h2>
+        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto mb-10">
+            <h2 class="text-xl font-bold text-center text-green-900 mb-6">Home Delivery Order</h2>
             <form id="orderForm" class="space-y-4">
-                <input type="tel" id="customer_phone" placeholder="Mobile Number *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-                <input type="text" id="manual_address" placeholder="Delivery Address" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg hover:bg-green-800 transition active:scale-95">SEND TO WHATSAPP</button>
+                <input type="text" id="cust_name" placeholder="Full Name / ಹೆಸರು *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                <input type="tel" id="cust_phone" placeholder="Phone / ಫೋನ್ *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="getLocation()" id="locBtn" class="bg-blue-50 text-blue-700 border border-blue-200 p-4 rounded-xl flex-1 font-semibold text-xs">📍 Share Location</button>
+                    <input type="text" id="manual_address" placeholder="Address / ವಿಳಾಸ" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500 flex-[1.5]">
+                </div>
+                <input type="hidden" id="geo_link">
+
+                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg active:scale-95 transition">SEND ORDER ON WHATSAPP</button>
             </form>
         </div>
     </main>
 
-    <div id="cart-total" class="total-banner">Total: ₹<span id="total-val">0</span></div>
+    <div id="cart-total" class="total-banner">Total Order: ₹<span id="total-val">0</span></div>
 
     <script>
-        // REPLACE THIS with your specific Sheet ID if you know it, otherwise keep the published URL
+        // UPDATED WITH YOUR DETAILS
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
-        const MY_WHATSAPP = '919980764852';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEI733W35iEKjWgoYMZ8SGr2bBTEEWx2XHU3QPzibJrs94dtTETh7RpIEaYxDkV1er/exec';
+        const WHATSAPP_NUM = '919980764852';
+
+        // Google Drive Link Fixer
+        function fixImageUrl(url, name) {
+            if (url && url.includes('drive.google.com')) {
+                const id = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
+                return `https://lh3.googleusercontent.com/d/${id}`;
+            }
+            // Auto-search if no URL is provided
+            return url && url.length > 5 ? url : `https://source.unsplash.com/featured/400x400?${name},vegetable`;
+        }
+
+        function getLocation() {
+            const btn = document.getElementById('locBtn');
+            if (navigator.geolocation) {
+                btn.innerText = "⌛ Locating...";
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const link = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('geo_link').value = link;
+                    btn.innerText = "✅ Location Saved";
+                    btn.classList.replace('bg-blue-50', 'bg-green-50');
+                }, () => {
+                    alert("Please enable GPS for home delivery.");
+                    btn.innerText = "📍 Try Again";
+                });
+            }
+        }
+
+        async function fetchHistory() {
+            const phone = document.getElementById('search_phone').value;
+            if(!phone) return alert("Enter phone number");
+            
+            const div = document.getElementById('history-results');
+            div.innerHTML = "Searching...";
+            div.classList.remove('hidden');
+
+            try {
+                const res = await fetch(SHEET_URL);
+                const text = await res.text();
+                const rows = text.split('\n').map(r => r.split(','));
+                // Assuming Phone is in Column 3 (index 2) of your Orders sheet
+                const history = rows.filter(r => r[2] && r[2].trim() === phone.trim());
+                
+                div.innerHTML = history.length ? history.map(r => `
+                    <div class="order-history-card">
+                        <p class="text-[10px] text-gray-400">${r[0]}</p>
+                        <p class="font-bold text-sm">Items: ${r[3]}</p>
+                        <p class="text-green-700 font-bold text-sm">₹${r[4]} • <span class="text-xs">${r[6] || 'Delivered'}</span></p>
+                    </div>
+                `).join('') : '<p class="text-sm text-gray-500">No previous orders found.</p>';
+            } catch (e) { div.innerHTML = "Error loading history."; }
+        }
 
         async function init() {
             try {
@@ -59,7 +130,7 @@
                 const items = parseCSV(csv);
                 renderItems(items);
                 document.getElementById('loading').style.display = 'none';
-            } catch (e) { console.error("Loading Error:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function parseCSV(text) {
@@ -74,47 +145,57 @@
         function renderItems(items) {
             const container = document.getElementById('shop-container');
             const categories = [...new Set(items.map(i => i.Category))];
-            
             container.innerHTML = categories.map(cat => `
                 <h2 class="category-header">${cat}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    ${items.filter(i => i.Category === cat).map(item => {
-                        
-                        // THIS IS THE FIX:
-                        // If you insert an image in a cell, Google Sheets doesn't export the image to CSV.
-                        // So, we use a fallback: it looks for a URL, and if empty, it uses the Name to find a high-quality photo.
-                        const img = (item.ImageURL && item.ImageURL.startsWith('http')) 
-                                    ? item.ImageURL 
-                                    : `https://source.unsplash.com/featured/400x400?${item.Name.split(' ')[0]},vegetable`;
-
-                        return `
+                    ${items.filter(i => i.Category === cat).map(item => `
                         <div class="veg-card">
                             <div class="img-container">
-                                <img src="${img}" alt="${item.Name}" class="veg-image" 
-                                     onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
+                                <img src="${fixImageUrl(item.ImageURL, item.Name)}" class="veg-image" onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
                             </div>
                             <div class="p-3">
-                                <h3 class="font-bold text-gray-800 text-sm">${item.Name}</h3>
-                                <p class="text-green-600 font-bold mt-1 text-sm">₹${item.Price} / ${item.Unit}</p>
-                                <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
-                                       class="qty-in mt-2 w-full border rounded-lg p-2 text-center outline-none focus:ring-1 focus:ring-green-400">
+                                <h3 class="font-bold text-sm leading-tight">${item.Name}</h3>
+                                <p class="text-[10px] text-gray-400">${item.KannadaName || ''}</p>
+                                <p class="text-green-600 font-bold text-sm mt-1">₹${item.Price} / ${item.Unit}</p>
+                                <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" class="qty-in mt-2 w-full border rounded-lg p-2 text-center text-sm focus:ring-1 focus:ring-green-400 outline-none">
                             </div>
-                        </div>`;
-                    }).join('')}
+                        </div>
+                    `).join('')}
                 </div>
             `).join('');
-
             document.querySelectorAll('.qty-in').forEach(i => i.addEventListener('input', calculateTotal));
         }
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('.qty-in').forEach(i => {
-                total += (parseFloat(i.value) || 0) * (parseFloat(i.dataset.price) || 0);
-            });
+            document.querySelectorAll('.qty-in').forEach(i => total += (parseFloat(i.value) || 0) * (parseFloat(i.dataset.price) || 0));
             document.getElementById('total-val').innerText = total;
             document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
         }
+
+        document.getElementById('orderForm').onsubmit = async (e) => {
+            e.preventDefault();
+            let details = "";
+            let total = document.getElementById('total-val').innerText;
+            if(total == "0") return alert("Please add items to cart!");
+
+            document.querySelectorAll('.qty-in').forEach(i => { if(i.value > 0) details += `${i.dataset.name}(${i.value}), `; });
+
+            const orderData = {
+                name: document.getElementById('cust_name').value,
+                phone: document.getElementById('cust_phone').value,
+                details: details,
+                amount: total,
+                location: document.getElementById('geo_link').value || document.getElementById('manual_address').value
+            };
+
+            // Save to Sheet (Background)
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
+
+            // Send to WhatsApp
+            const waMsg = `*V.S. MART ORDER*%0A*Name:* ${orderData.name}%0A*Items:* ${details}%0A*Total:* ₹${total}%0A*Location:* ${orderData.location}`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${waMsg}`, '_blank');
+        };
 
         init();
     </script>
