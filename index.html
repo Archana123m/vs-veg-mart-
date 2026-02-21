@@ -16,7 +16,7 @@
         .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; transition: transform 0.2s; }
         .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; text-align: center; font-weight: bold; z-index: 40; display: none; }
+        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; z-index: 40; display: none; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); }
         .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
     </style>
 </head>
@@ -45,7 +45,7 @@
         <section class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
             <h3 class="font-bold text-gray-700 mb-2 text-sm">My Orders / ನನ್ನ ಆರ್ಡರ್‌ಗಳು</h3>
             <div class="flex gap-2">
-                <input type="tel" id="search_phone" placeholder="Enter Mobile Number" class="flex-1 p-2 border rounded-lg outline-none text-sm">
+                <input type="tel" id="search_phone" placeholder="Mobile Number" class="flex-1 p-2 border rounded-lg outline-none text-sm">
                 <button onclick="fetchHistory()" class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold">Check</button>
             </div>
             <div id="history-results" class="mt-4 max-h-48 overflow-y-auto hidden space-y-2"></div>
@@ -60,5 +60,152 @@
                 <input type="tel" id="cust_phone" placeholder="Phone / ಫೋನ್ *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
                 <div class="flex gap-2">
                     <button type="button" onclick="getLocation()" id="locBtn" class="bg-blue-50 text-blue-700 border border-blue-200 p-4 rounded-xl flex-1 font-bold text-xs">📍 Share Location</button>
-                    <input type="text" id="manual_address" placeholder="Address" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-
-    
+                    <input type="text" id="manual_address" placeholder="Address" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500 flex-[1.5]">
+                </div>
+                <input type="hidden" id="geo_link">
+                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg active:scale-95 transition">ORDER ON WHATSAPP</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="cart-total" class="total-banner">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <div class="text-left">
+                <p class="text-xs opacity-80">Total Amount</p>
+                <p class="text-xl font-bold">₹<span id="total-val">0</span></p>
+            </div>
+            <button onclick="clearCart()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition flex items-center gap-1">
+                <span>🔄</span> Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEI733W35iEKjWgoYMZ8SGr2bBTEEWx2XHU3QPzibJrs94dtTETh7RpIEaYxDkV1er/exec';
+        const WHATSAPP_NUM = '919980764852';
+
+        let allVegetables = [];
+
+        function fixImageUrl(url, name) {
+            if (url && url.includes('drive.google.com')) {
+                const id = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
+                return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+            }
+            return url && url.length > 5 ? url : `https://source.unsplash.com/featured/400x400?${name},vegetable`;
+        }
+
+        function getLocation() {
+            const btn = document.getElementById('locBtn');
+            if (navigator.geolocation) {
+                btn.innerText = "⌛ Locating...";
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('geo_link').value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    btn.innerText = "✅ Saved";
+                    btn.classList.replace('bg-blue-50', 'bg-green-100');
+                }, () => alert("Enable GPS for location sharing."));
+            }
+        }
+
+        async function init() {
+            try {
+                const res = await fetch(SHEET_URL);
+                const csv = await res.text();
+                const items = parseCSV(csv);
+                allVegetables = items.filter(item => !item.Stock || item.Stock.toLowerCase() === 'in');
+                renderItems(allVegetables);
+                document.getElementById('loading').style.display = 'none';
+            } catch (e) { console.error(e); }
+        }
+
+        function parseCSV(text) {
+            const rows = text.trim().split('\n');
+            const headers = rows[0].split(',').map(h => h.trim());
+            return rows.slice(1).map(row => {
+                const values = row.split(',').map(v => v.trim());
+                return headers.reduce((obj, h, i) => { obj[h] = values[i]; return obj; }, {});
+            });
+        }
+
+        function renderItems(items) {
+            const container = document.getElementById('shop-container');
+            const categories = [...new Set(items.map(i => i.Category))];
+            
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center py-10"><p class="text-gray-400">No items found.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = categories.map(cat => `
+                <div class="category-block">
+                    <h2 class="category-header">${cat}</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        ${items.filter(i => i.Category === cat).map(item => `
+                            <div class="veg-card">
+                                <div class="img-container">
+                                    <img src="${fixImageUrl(item.ImageURL, item.Name)}" class="veg-image" onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
+                                </div>
+                                <div class="p-3">
+                                    <h3 class="font-bold text-sm leading-tight">${item.Name}</h3>
+                                    <p class="text-[10px] text-gray-400 italic">${item.KannadaName || ''}</p>
+                                    <p class="text-green-600 font-bold text-sm mt-1">₹${item.Price} / ${item.Unit}</p>
+                                    <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
+                                           class="qty-in mt-2 w-full border rounded-lg p-2 text-center text-sm outline-none focus:ring-1 focus:ring-green-400">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            document.querySelectorAll('.qty-in').forEach(i => i.addEventListener('input', calculateTotal));
+        }
+
+        function filterVegetables() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allVegetables.filter(item => 
+                item.Name.toLowerCase().includes(query) || 
+                (item.KannadaName && item.KannadaName.toLowerCase().includes(query))
+            );
+            renderItems(filtered);
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.qty-in').forEach(i => total += (parseFloat(i.value) || 0) * (parseFloat(i.dataset.price) || 0));
+            document.getElementById('total-val').innerText = total;
+            document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
+        }
+
+        function clearCart() {
+            if(confirm("Clear your shopping list?")) {
+                document.querySelectorAll('.qty-in').forEach(i => i.value = "");
+                calculateTotal();
+            }
+        }
+
+        document.getElementById('orderForm').onsubmit = async (e) => {
+            e.preventDefault();
+            let details = "";
+            let total = document.getElementById('total-val').innerText;
+            if(total == "0") return alert("Cart is empty!");
+
+            document.querySelectorAll('.qty-in').forEach(i => { if(i.value > 0) details += `${i.dataset.name}(${i.value}), `; });
+
+            const orderData = {
+                name: document.getElementById('cust_name').value,
+                phone: document.getElementById('cust_phone').value,
+                details: details,
+                amount: total,
+                location: document.getElementById('geo_link').value || document.getElementById('manual_address').value
+            };
+
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
+
+            const waMsg = `*V.S. MART ORDER*%0A*Name:* ${orderData.name}%0A*Items:* ${details}%0A*Total:* ₹${total}%0A*Address:* ${orderData.location}`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${waMsg}`, '_blank');
+        };
+
+        init();
+    </script>
+</body>
+</html>
