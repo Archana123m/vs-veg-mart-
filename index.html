@@ -12,16 +12,17 @@
             background-size: cover; background-position: center;
         }
         .veg-card { border: 1px solid #f0f0f0; border-radius: 15px; background: white; transition: 0.3s; }
-        #cart-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 400px; background: white; z-index: 1000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
-        #cart-sidebar.active { right: 0; }
+        #cart-sidebar, #history-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 400px; background: white; z-index: 1000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        #cart-sidebar.active, #history-sidebar.active { right: 0; }
         .filter-btn.active { background-color: #166534; color: white; border-color: #166534; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 pb-20">
+<body class="bg-gray-50 pb-24">
 
-    <header class="hero-bg text-white p-8 text-center">
+    <header class="hero-bg text-white p-8 text-center relative">
+        <button onclick="toggleHistory(true)" class="absolute top-4 right-4 bg-white/20 px-3 py-1 rounded-lg text-xs border border-white/30 backdrop-blur-sm">📜 Order History</button>
         <h1 class="text-3xl font-bold tracking-tight">V.S. VEGETABLE MART</h1>
         <p class="text-green-300 italic text-sm mt-2">"Farm fresh Vegetables are provided for all kind of occasions"</p>
         <div class="mt-4 font-bold text-lg">📞 9980764752</div>
@@ -31,7 +32,7 @@
         <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Search vegetables (English)..." 
                class="w-full p-4 border-2 border-green-100 rounded-2xl shadow-sm outline-none focus:border-green-600">
         
-        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="category-bar">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="category-bar">
             <button onclick="setCategory('All')" class="filter-btn active whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">All</button>
             <button onclick="setCategory('Essentials')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Essentials</button>
             <button onclick="setCategory('Local specials')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Local specials</button>
@@ -42,37 +43,55 @@
 
     <main id="shop-container" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto"></main>
 
-    <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-5 text-center font-bold hidden cursor-pointer shadow-2xl z-50" onclick="toggleCart(true)">
-        REVIEW ORDER & TOTAL: ₹<span id="total-val">0</span>
+    <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-5 text-center font-bold hidden cursor-pointer shadow-2xl z-50 flex justify-between items-center px-8" onclick="toggleCart(true)">
+        <span>REVIEW BASKET</span>
+        <span>TOTAL: ₹<span id="total-val">0</span></span>
     </div>
 
     <div id="cart-sidebar" class="p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h2 class="font-bold text-2xl">Your Basket</h2>
+            <h2 class="font-bold text-2xl text-gray-800">Your Basket</h2>
             <button onclick="toggleCart(false)" class="text-3xl">×</button>
         </div>
-        <div id="cart-list" class="space-y-4 mb-8"></div>
-        <div class="space-y-4">
-            <input type="text" id="cust_name" placeholder="Enter Your Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+        <div id="cart-list" class="space-y-4 mb-6"></div>
+        
+        <div class="space-y-3 bg-gray-50 p-4 rounded-xl mb-6 border border-gray-100">
+            <h3 class="font-bold text-gray-700">Delivery Details</h3>
+            <input type="text" id="cust_name" placeholder="Full Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
             <input type="tel" id="cust_phone" placeholder="WhatsApp Number" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
-            <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition">ORDER ON WHATSAPP</button>
+            
+            <div class="flex gap-2">
+                <input type="text" id="cust_location" placeholder="Address or GPS link" class="flex-1 p-3 border rounded-xl outline-none text-sm focus:ring-2 ring-green-500">
+                <button onclick="getLocation()" class="bg-green-100 text-green-700 px-3 rounded-xl text-xs font-bold border border-green-200">📍 GET GPS</button>
+            </div>
+        </div>
+
+        <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition shadow-lg">ORDER ON WHATSAPP</button>
+    </div>
+
+    <div id="history-sidebar" class="p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="font-bold text-2xl text-gray-800">Order History</h2>
+            <button onclick="toggleHistory(false)" class="text-3xl">×</button>
+        </div>
+        <div class="mb-6">
+            <p class="text-xs text-gray-500 mb-2">View past orders for your mobile number:</p>
+            <input type="tel" id="history_phone" placeholder="Enter Mobile Number" class="w-full p-3 border rounded-xl outline-none mb-3">
+            <button onclick="fetchHistory()" id="history-btn" class="w-full bg-gray-800 text-white py-3 rounded-xl text-sm font-bold">Search Orders</button>
+        </div>
+        <div id="history-results" class="space-y-4">
+            <div class="text-gray-400 text-center py-10 italic">No search results yet</div>
         </div>
     </div>
 
     <script>
+        // --- CONFIGURATION ---
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwbdQOX4R6WqRL-cS3pfHMgSkQdhso69yk_zLXp1XjiWyhZ-Z4Qv9kFL9i_mgMH3sx/exec'; 
         const WHATSAPP_NUM = '919980764752';
+
         let allItems = [];
         let currentCategory = 'All';
-
-        function formatDriveUrl(url) {
-            if (!url || !url.includes('drive.google.com')) return url || 'https://via.placeholder.com/300?text=No+Image';
-            try {
-                const parts = url.split(/\/d\/|id=/);
-                const id = parts[1].split(/[/?&]/)[0];
-                return `https://lh3.googleusercontent.com/d/${id}=w400-h400-p`;
-            } catch (e) { return url; }
-        }
 
         async function loadData() {
             try {
@@ -86,22 +105,30 @@
                         name: cols[0]?.replace(/"/g, '').trim(), 
                         price: parseFloat(cols[2]) || 0,        
                         unit: cols[3]?.trim() || 'kg',          
-                        category: cols[6]?.trim() || 'Other',   // Column G (Index 6)
+                        category: cols[6]?.trim() || 'Other',
                         img: formatDriveUrl(cols[5]?.trim()),   
                         stock: cols[7]?.trim().toLowerCase()    
                     };
                 }).filter(i => i.name && i.stock !== 'out');
                 
                 filterItems();
-            } catch (e) { alert("Error loading shop data."); }
+            } catch (e) { console.error("Error loading items"); }
+        }
+
+        function formatDriveUrl(url) {
+            if (!url || !url.includes('drive.google.com')) return url || 'https://via.placeholder.com/300?text=No+Image';
+            try {
+                const parts = url.split(/\/d\/|id=/);
+                const id = parts[1].split(/[/?&]/)[0];
+                return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+            } catch (e) { return url; }
         }
 
         function render(items) {
             const container = document.getElementById('shop-container');
             container.innerHTML = items.map(item => `
                 <div class="veg-card p-3 shadow-sm flex flex-col">
-                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-3 bg-gray-100" 
-                         onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
+                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-3 bg-gray-50" onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
                     <h3 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h3>
                     <p class="text-green-700 font-bold mb-3 text-lg">₹${item.price}<span class="text-xs text-gray-400 font-normal">/${item.unit}</span></p>
                     <input type="number" min="0" step="any" placeholder="Qty" oninput="updateTotal()" 
@@ -113,18 +140,16 @@
 
         function setCategory(cat) {
             currentCategory = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === cat);
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === cat));
             filterItems();
         }
 
         function filterItems() {
             const q = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allItems.filter(item => {
-                const matchesSearch = item.name.toLowerCase().includes(q);
-                const matchesCategory = currentCategory === 'All' || item.category === currentCategory;
-                return matchesSearch && matchesCategory;
+            const filtered = allItems.filter(i => {
+                const matchesCat = (currentCategory === 'All' || i.category === currentCategory);
+                const matchesSearch = i.name.toLowerCase().includes(q);
+                return matchesCat && matchesSearch;
             });
             render(filtered);
         }
@@ -133,29 +158,88 @@
             let total = 0;
             document.querySelectorAll('.qty-input').forEach(i => total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price));
             document.getElementById('total-val').innerText = total.toFixed(2);
-            document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
+            document.getElementById('cart-total').style.display = total > 0 ? 'flex' : 'none';
         }
 
         function toggleCart(show) { document.getElementById('cart-sidebar').classList.toggle('active', show); if(show) updateCartList(); }
+        function toggleHistory(show) { document.getElementById('history-sidebar').classList.toggle('active', show); }
 
         function updateCartList() {
             let html = "";
             document.querySelectorAll('.qty-input').forEach(i => {
                 if(parseFloat(i.value) > 0) {
-                    html += `<div class="flex justify-between border-b pb-2"><span>${i.dataset.name} x ${i.value}</span><b>₹${(i.value * i.dataset.price).toFixed(2)}</b></div>`;
+                    html += `<div class="flex justify-between border-b pb-2 text-sm"><span>${i.dataset.name} x ${i.value}</span><b>₹${(i.value * i.dataset.price).toFixed(2)}</b></div>`;
                 }
             });
             document.getElementById('cart-list').innerHTML = html || "Basket is empty";
         }
 
-        function sendOrder() {
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => {
+                    document.getElementById('cust_location').value = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+                }, () => alert("Location access denied. Please type manually."));
+            }
+        }
+
+        async function sendOrder() {
             const name = document.getElementById('cust_name').value;
             const phone = document.getElementById('cust_phone').value;
-            if(!name || !phone) return alert("Please enter Name and Phone Number");
+            const loc = document.getElementById('cust_location').value;
+            const total = document.getElementById('total-val').innerText;
+            if(!name || !phone) return alert("Please fill Name and Phone");
+
             let items = "";
             document.querySelectorAll('.qty-input').forEach(i => { if(i.value > 0) items += `• ${i.dataset.name}: ${i.value}\n`; });
-            const msg = encodeURIComponent(`*ORDER - V.S. VEGETABLE MART*\n\nName: ${name}\nPhone: ${phone}\n\n*Items:*\n${items}\n*Total: ₹${document.getElementById('total-val').innerText}*`);
+
+            // Send to Google Sheets
+            try {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: 'saveOrder', name, phone, location: loc, items, total })
+                });
+            } catch (e) { console.error("Cloud save failed"); }
+
+            // Open WhatsApp
+            const msg = encodeURIComponent(`*NEW ORDER - V.S. MART*\n*Name:* ${name}\n*Phone:* ${phone}\n*Location:* ${loc}\n\n*Items:*\n${items}\n*Total: ₹${total}*`);
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`);
+        }
+
+        async function fetchHistory() {
+            const phone = document.getElementById('history_phone').value;
+            if(!phone) return alert("Enter phone number");
+
+            const btn = document.getElementById('history-btn');
+            const container = document.getElementById('history-results');
+            btn.innerText = "Searching...";
+            
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getHistory', phone: phone })
+                });
+                const history = await res.json();
+                
+                if(!history || history.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">No orders found for this number.</div>`;
+                } else {
+                    container.innerHTML = history.reverse().map(o => `
+                        <div class="bg-gray-100 p-4 rounded-xl text-xs border-l-4 border-green-600">
+                            <div class="flex justify-between font-bold mb-2">
+                                <span>📅 ${new Date(o[0]).toLocaleDateString()}</span>
+                                <span class="text-green-700">₹${o[5]}</span>
+                            </div>
+                            <div class="whitespace-pre-line text-gray-600 mb-2">${o[4]}</div>
+                            <div class="text-blue-500 underline truncate">${o[3] || 'Manual Location'}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                container.innerHTML = "Error fetching data. Check your connection.";
+            } finally {
+                btn.innerText = "Search Orders";
+            }
         }
 
         loadData();
