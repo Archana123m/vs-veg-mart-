@@ -13,9 +13,9 @@
             background-size: cover; background-position: center; padding: 60px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
         }
         .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; }
-        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; position: relative; }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2.5rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
+        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
         #loading { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; text-align: center; font-weight: bold; z-index: 40; display: none; }
     </style>
@@ -24,30 +24,31 @@
 
     <div id="loading">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
-        <p class="text-green-800 font-bold">Fetching Correct Images...</p>
+        <p class="text-green-800 font-bold">Loading Your Selection...</p>
     </div>
 
     <header class="hero-section">
         <h1 class="text-3xl font-bold uppercase">V.S. Vegetable Mart</h1>
-        <p class="text-xl text-green-400 font-bold">Devanahalli • 9980764852</p>
+        <p class="text-xl text-green-400 font-bold"> Gandhi Chowka, Devanahalli</p>
     </header>
 
     <main class="max-w-6xl mx-auto px-4">
         <div id="shop-container"></div>
 
-        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto">
+        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto mb-10 text-center">
+            <h2 class="text-xl font-bold text-green-900 mb-4">Complete Your Order</h2>
             <form id="orderForm" class="space-y-4">
-                <input type="tel" id="customer_phone" placeholder="Mobile Number *" required class="w-full p-4 border rounded-xl bg-gray-50 outline-none">
-                <button type="button" id="getLocation" class="w-full p-4 border-2 border-dashed border-green-500 rounded-xl text-green-700 font-semibold">📍 Share Location</button>
-                <input type="text" id="manual_address" placeholder="Address" class="w-full p-4 border rounded-xl bg-gray-50 outline-none">
-                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl">ORDER ON WHATSAPP</button>
+                <input type="tel" id="customer_phone" placeholder="Mobile Number *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                <input type="text" id="manual_address" placeholder="Delivery Address" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg hover:bg-green-800 transition active:scale-95">SEND TO WHATSAPP</button>
             </form>
         </div>
     </main>
 
-    <div id="cart-total" class="total-banner">Total Order: ₹<span id="total-val">0</span></div>
+    <div id="cart-total" class="total-banner">Total: ₹<span id="total-val">0</span></div>
 
     <script>
+        // REPLACE THIS with your specific Sheet ID if you know it, otherwise keep the published URL
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
         const MY_WHATSAPP = '919980764852';
 
@@ -58,7 +59,7 @@
                 const items = parseCSV(csv);
                 renderItems(items);
                 document.getElementById('loading').style.display = 'none';
-            } catch (e) { alert("Error loading data."); }
+            } catch (e) { console.error("Loading Error:", e); }
         }
 
         function parseCSV(text) {
@@ -79,17 +80,18 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     ${items.filter(i => i.Category === cat).map(item => {
                         
-                        // IMPROVED IMAGE LOGIC
-                        // We use Unsplash Source which is much more accurate for vegetables.
-                        // It searches for the name in Column B + the word "vegetable"
-                        const searchName = item.Name.split(' ')[0].toLowerCase(); // Take first word (e.g. "Green" from "Green Chillies")
-                        const img = `https://source.unsplash.com/featured/400x400?${searchName},vegetable`;
-                        
+                        // THIS IS THE FIX:
+                        // If you insert an image in a cell, Google Sheets doesn't export the image to CSV.
+                        // So, we use a fallback: it looks for a URL, and if empty, it uses the Name to find a high-quality photo.
+                        const img = (item.ImageURL && item.ImageURL.startsWith('http')) 
+                                    ? item.ImageURL 
+                                    : `https://source.unsplash.com/featured/400x400?${item.Name.split(' ')[0]},vegetable`;
+
                         return `
                         <div class="veg-card">
                             <div class="img-container">
                                 <img src="${img}" alt="${item.Name}" class="veg-image" 
-                                     onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'">
+                                     onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
                             </div>
                             <div class="p-3">
                                 <h3 class="font-bold text-gray-800 text-sm">${item.Name}</h3>
