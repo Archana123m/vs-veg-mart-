@@ -12,9 +12,10 @@
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
             background-size: cover; background-position: center; padding: 30px 20px; text-align: center; color: white;
         }
-        .veg-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; height: 100%; }
-        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; position: relative; }
-        .veg-image { width: 100%; height: 100%; object-fit: cover; }
+        .veg-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; height: 100%; transition: transform 0.2s; }
+        .veg-card:active { transform: scale(0.98); }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
+        .veg-image { width: 100%; height: 100%; object-fit: cover; display: block; }
         
         #cart-total-bar { 
             position: fixed; bottom: 0; left: 0; right: 0; 
@@ -65,35 +66,42 @@
             <button onclick="toggleSidebar(false)" class="text-2xl">✕</button>
         </div>
 
-        <div id="cart-items-list" class="space-y-4 mb-8 max-h-[40vh] overflow-y-auto"></div>
+        <div id="cart-items-list" class="space-y-4 mb-8 max-h-[50vh] overflow-y-auto"></div>
 
         <div class="bg-gray-50 p-4 rounded-2xl space-y-3">
-            <input type="text" id="cust_name" placeholder="Your Name / ಹೆಸರು" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-            <input type="tel" id="cust_phone" placeholder="Phone Number / ಫೋನ್" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-            
-            <button onclick="getLocation()" id="locBtn" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-95">
+            <input type="text" id="cust_name" placeholder="Your Name / ಹೆಸರು" class="w-full p-3 border rounded-xl outline-none">
+            <input type="tel" id="cust_phone" placeholder="Phone Number / ಫೋನ್" class="w-full p-3 border rounded-xl outline-none">
+            <button onclick="getLocation()" id="locBtn" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md">
                 📍 Share Delivery Location
             </button>
-            
-            <textarea id="cust_addr" placeholder="Manual Address / Landmark / ವಿಳಾಸ" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500"></textarea>
-            
+            <textarea id="cust_addr" placeholder="Manual Address / Landmark" class="w-full p-3 border rounded-xl outline-none"></textarea>
             <button onclick="checkout()" class="w-full bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition">ORDER ON WHATSAPP</button>
         </div>
     </div>
 
     <script>
-        // UPDATED GOOGLE SHEETS LINK
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
         const WHATSAPP = '919980764752';
         let inventory = [];
         let geoLink = "";
 
-        // GOOGLE DRIVE IMAGE FIXER
+        // MOST AGGRESSIVE IMAGE FIXER FOR DRIVE
         function getDirectImg(url) {
-            if (!url || url.length < 5) return 'https://via.placeholder.com/300?text=Fresh+Veg';
+            if (!url || url.length < 10) return 'https://via.placeholder.com/300?text=V.S.+Mart';
+            
             if (url.includes('drive.google.com')) {
-                let id = url.includes('id=') ? url.split('id=')[1].split('&')[0] : url.split('/d/')[1].split('/')[0];
-                return `https://docs.google.com/uc?export=view&id=${id}`;
+                let id = "";
+                try {
+                    if (url.includes('id=')) {
+                        id = url.split('id=')[1].split('&')[0];
+                    } else if (url.includes('/d/')) {
+                        id = url.split('/d/')[1].split('/')[0];
+                    }
+                    // This specific URL format is currently the most bypass-friendly
+                    return `https://lh3.googleusercontent.com/d/${id}`;
+                } catch (e) {
+                    return 'https://via.placeholder.com/300?text=Error+Loading';
+                }
             }
             return url;
         }
@@ -104,18 +112,18 @@
                 const data = await response.text();
                 const rows = data.split('\n').slice(1); 
                 inventory = rows.map(row => {
-                    const columns = row.split(',');
+                    // Handle CSV values that might contain commas inside quotes
+                    const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        category: columns[0]?.trim(),
-                        name: columns[1]?.trim(),
+                        name: columns[1]?.replace(/"/g, '').trim(),
                         price: parseFloat(columns[2]) || 0,
-                        unit: columns[3]?.trim() || 'kg',
-                        img: columns[4]?.trim(),
-                        stock: columns[7]?.trim().toLowerCase()
+                        unit: columns[3]?.replace(/"/g, '').trim() || 'kg',
+                        img: columns[4]?.replace(/"/g, '').trim(),
+                        stock: columns[7]?.replace(/"/g, '').trim().toLowerCase()
                     };
                 }).filter(item => item.name && item.stock !== 'out');
                 render(inventory);
-            } catch (err) { console.error("Data load failed", err); }
+            } catch (err) { console.error(err); }
         }
 
         function render(items) {
@@ -123,18 +131,21 @@
             grid.innerHTML = items.map(item => `
                 <div class="veg-card">
                     <div class="img-container">
-                        <img src="${getDirectImg(item.img)}" class="veg-image" 
+                        <img src="${getDirectImg(item.img)}" 
+                             class="veg-image" 
+                             crossorigin="anonymous"
+                             referrerpolicy="no-referrer"
                              onerror="this.onerror=null;this.src='https://via.placeholder.com/300?text=${encodeURIComponent(item.name)}'">
                     </div>
                     <div class="p-3">
                         <h3 class="font-bold text-sm h-10 overflow-hidden leading-tight">${item.name}</h3>
                         <p class="text-green-700 font-bold text-sm">₹${item.price} / ${item.unit}</p>
-                        <input type="number" step="0.25" min="0" placeholder="Qty (0.5, 1...)" 
+                        <input type="number" step="0.25" min="0" placeholder="Qty" 
                                oninput="calcTotal()" 
                                data-name="${item.name}" 
                                data-price="${item.price}" 
                                data-unit="${item.unit}"
-                               class="qty-input mt-2 w-full border-2 border-gray-100 rounded-lg p-2 text-center focus:border-green-400 outline-none">
+                               class="qty-input mt-2 w-full border-2 border-gray-100 rounded-lg p-2 text-center focus:border-green-500 outline-none">
                     </div>
                 </div>
             `).join('');
@@ -178,43 +189,34 @@
 
         function filterItems() {
             const q = document.getElementById('searchBox').value.toLowerCase();
-            const filtered = inventory.filter(i => i.name.toLowerCase().includes(q));
-            render(filtered);
+            render(inventory.filter(i => i.name.toLowerCase().includes(q)));
         }
 
         function getLocation() {
             const btn = document.getElementById('locBtn');
             if (navigator.geolocation) {
                 btn.innerText = "⌛ Fetching GPS...";
-                navigator.geolocation.getCurrentPosition((position) => {
-                    geoLink = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    geoLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
                     btn.innerText = "✅ Location Locked";
                     btn.classList.replace('bg-blue-600', 'bg-green-600');
-                }, () => {
-                    alert("GPS access denied. Please enter address manually.");
-                    btn.innerText = "📍 Share Delivery Location";
-                });
+                }, () => { alert("GPS denied."); btn.innerText = "📍 Share Delivery Location"; });
             }
         }
 
         function checkout() {
             const name = document.getElementById('cust_name').value;
             const phone = document.getElementById('cust_phone').value;
-            const manualAddr = document.getElementById('cust_addr').value;
-            
-            if(!name || !phone) return alert("Please enter Name and Phone");
-
+            const addr = document.getElementById('cust_addr').value;
+            if(!name || !phone) return alert("Fill Name and Phone");
             let itemsTxt = "";
             document.querySelectorAll('.qty-input').forEach(input => {
                 const val = parseFloat(input.value) || 0;
                 if(val > 0) itemsTxt += `• ${input.dataset.name}: ${val} ${input.dataset.unit}\n`;
             });
-
-            const finalTotal = document.getElementById('total-val').innerText;
-            const addressInfo = geoLink ? `*Live Location:* ${geoLink}\n*Manual Address:* ${manualAddr}` : `*Address:* ${manualAddr}`;
-            
-            const message = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n${addressInfo}\n\n*Items Ordered:*\n${itemsTxt}\n*Total Bill: ₹${finalTotal}*`);
-            window.open(`https://wa.me/${WHATSAPP}?text=${message}`);
+            const addrInfo = geoLink ? `*Live Location:* ${geoLink}\n*Manual Address:* ${addr}` : `*Address:* ${addr}`;
+            const msg = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n${addrInfo}\n\n*Items:*\n${itemsTxt}\n*Total: ₹${document.getElementById('total-val').innerText}*`);
+            window.open(`https://wa.me/${WHATSAPP}?text=${msg}`);
         }
 
         fetchSheet();
