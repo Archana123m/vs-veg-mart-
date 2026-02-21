@@ -8,96 +8,61 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #f8fafc; font-family: 'Poppins', 'Noto Sans Kannada', sans-serif; }
-        
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover;
-            background-position: center;
-            padding: 80px 20px;
-            text-align: center;
-            color: white;
-            border-bottom: 5px solid #059669;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover; background-position: center; padding: 60px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
         }
-
-        .veg-card { background: white; border-radius: 1.25rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s ease; display: flex; flex-direction: column; height: 100%; }
-        .veg-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border-color: #10b981; }
-        
-        /* Fixed aspect ratio for images */
-        .img-container { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #f1f5f9; }
+        .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; }
+        .veg-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #10b981; }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        
-        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 3rem 0 1.5rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
-        
+        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2.5rem 0 1.5rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
         #loading { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1.2rem; text-align: center; font-weight: bold; z-index: 40; display: none; box-shadow: 0 -10px 15px rgba(0,0,0,0.2); font-size: 1.2rem; }
+        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; text-align: center; font-weight: bold; z-index: 40; display: none; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="loading">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
-        <p class="text-green-800 font-bold text-center px-4">Loading Fresh Stock... <br> ತಾಜಾ ತರಕಾರಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...</p>
+        <p class="text-green-800 font-bold">Loading Fresh Stock...</p>
     </div>
 
     <header class="hero-section">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-6xl font-extrabold uppercase mb-2 tracking-tight">V.S. Vegetable Mart</h1>
-            <p class="text-2xl md:text-3xl font-bold text-green-400 mb-4">📞 9980764852</p>
-            <p class="text-sm md:text-lg font-medium tracking-widest opacity-90">Gandhi Chowka, Devanahalli</p>
-        </div>
+        <h1 class="text-4xl font-bold uppercase mb-2">V.S. Vegetable Mart</h1>
+        <p class="text-xl font-bold text-green-400">📞 9980764852</p>
+        <div class="mt-4 inline-block bg-white/20 px-4 py-2 rounded-full text-xs">Freshness You Can Trust</div>
     </header>
 
     <main class="max-w-6xl mx-auto px-4">
         <div id="shop-container"></div>
 
-        <div class="mt-16 bg-white rounded-3xl p-6 md:p-10 shadow-2xl border border-green-100 max-w-2xl mx-auto mb-10">
-            <h2 class="text-2xl font-bold text-center text-green-900 mb-8 underline decoration-green-500 underline-offset-8">Finalize Order / ಆರ್ಡರ್ ಮಾಡಿ</h2>
-            <form id="orderForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Mobile Number / ಮೊಬೈಲ್ ಸಂಖ್ಯೆ *</label>
-                    <input type="tel" id="customer_phone" placeholder="9876543210" required class="w-full p-4 border-2 border-gray-100 rounded-xl bg-gray-50 outline-none focus:border-green-500 transition-all text-lg">
-                </div>
-                
-                <div class="space-y-3">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Delivery Location / ವಿಳಾಸ</label>
-                    <button type="button" id="getLocation" class="w-full p-4 border-2 border-dashed border-green-500 rounded-xl text-green-700 font-bold flex items-center justify-center gap-2 hover:bg-green-50 transition-all">
-                        📍 Click to Share Live Location
-                    </button>
-                    <input type="text" id="manual_address" placeholder="Or type your address manually" class="w-full p-4 border-2 border-gray-100 rounded-xl bg-gray-50 outline-none focus:border-green-500">
-                </div>
-
-                <textarea id="remarks" placeholder="Any special notes? (e.g. Leave at gate, bring change for 500)" class="w-full p-4 border-2 border-gray-100 rounded-xl bg-gray-50 h-28 outline-none focus:border-green-500"></textarea>
-                
-                <button type="submit" class="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-green-700 text-xl transition transform active:scale-95 uppercase tracking-wider">
-                    Send Order to WhatsApp ➔
-                </button>
+        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto">
+            <h2 class="text-xl font-bold text-center text-green-900 mb-6">Complete Your Order</h2>
+            <form id="orderForm" class="space-y-4">
+                <input type="tel" id="customer_phone" placeholder="Mobile Number *" required class="w-full p-4 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-green-500">
+                <button type="button" id="getLocation" class="w-full p-4 border-2 border-dashed border-green-500 rounded-xl text-green-700 font-semibold">📍 Share Live Location</button>
+                <input type="text" id="manual_address" placeholder="Or type Address manually" class="w-full p-4 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-green-500">
+                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg hover:bg-green-800 transition active:scale-95">SEND ORDER ON WHATSAPP</button>
             </form>
         </div>
     </main>
 
-    <div id="cart-total" class="total-banner">
-        🛒 Total: ₹<span id="total-val">0</span> | ಪಾವತಿಸಬೇಕಾದ ಮೊತ್ತ
-    </div>
+    <div id="cart-total" class="total-banner">Total: ₹<span id="total-val">0</span></div>
 
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
-        const MY_WHATSAPP = '919980764852'; 
+        const MY_WHATSAPP = '919980764852';
         let googleMapsLink = "";
 
-        // Geolocation
         document.getElementById('getLocation').onclick = function() {
-            const btn = this;
             if (navigator.geolocation) {
-                btn.innerText = "⌛ Detecting Location...";
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        googleMapsLink = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
-                        btn.innerText = "✅ Location Locked!";
-                        btn.style.background = "#d1fae5";
-                        btn.style.borderColor = "#10b981";
-                    },
-                    () => { alert("Please enable GPS for better delivery."); btn.innerText = "❌ GPS Error"; }
-                );
+                this.innerText = "⌛ Detecting...";
+                navigator.geolocation.getCurrentPosition((p) => {
+                    googleMapsLink = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
+                    this.innerText = "✅ Location Saved!";
+                    this.classList.add('bg-green-100');
+                });
             }
         };
 
@@ -108,7 +73,7 @@
                 const items = parseCSV(csv);
                 renderItems(items);
                 document.getElementById('loading').style.display = 'none';
-            } catch (e) { console.error(e); }
+            } catch (e) { alert("Error loading data."); }
         }
 
         function parseCSV(text) {
@@ -126,234 +91,48 @@
             
             container.innerHTML = categories.map(cat => `
                 <h2 class="category-header">${cat}</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     ${items.filter(i => i.Category === cat).map(item => {
+                        // FORCE AUTO-IMAGE BASED ON NAME
+                        const itemName = item.Name.replace(/\s+/g, '-').toLowerCase();
+                        const img = `https://loremflickr.com/320/320/${itemName},vegetable/all`;
                         
-                        // AUTO-IMAGE LOGIC: 
-                        // If Sheet has no URL, it searches Unsplash for the vegetable name automatically
-                        const autoImg = `https://images.unsplash.com/photo-1566385101042-1a0aa0c12e8c?auto=format&fit=crop&q=60&w=400&q=80`; // Default placeholder
-                        const searchKeyword = item.Name.toLowerCase();
-                        const dynamicImg = `https://loremflickr.com/400/300/${searchKeyword},vegetable/all`;
-
                         return `
                         <div class="veg-card">
                             <div class="img-container">
-                                <img src="${dynamicImg}" alt="${item.Name}" class="veg-image" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2329/2329865.png'">
+                                <img src="${img}" alt="${item.Name}" class="veg-image" loading="lazy">
                             </div>
-                            <div class="p-4 flex-grow flex flex-col">
-                                <h3 class="font-bold text-gray-800 text-lg leading-tight mb-1">${item.Name}</h3>
-                                <p class="text-xs text-green-700 font-bold mb-2">${item.KannadaName}</p>
-                                <div class="mt-auto">
-                                    <p class="text-green-600 font-black text-xl">₹${item.Price} <span class="text-xs text-gray-400 font-normal">/ ${item.Unit}</span></p>
-                                    <input type="number" min="0" step="any" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
-                                           class="qty-in mt-3 w-full border-2 border-gray-100 rounded-xl p-2 text-center font-bold text-green-800 focus:border-green-500 outline-none bg-gray-50">
-                                </div>
+                            <div class="p-3">
+                                <h3 class="font-bold text-gray-800 text-sm">${item.Name}</h3>
+                                <p class="text-green-600 font-bold mt-1 text-sm">₹${item.Price} / ${item.Unit}</p>
+                                <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
+                                       class="qty-in mt-3 w-full border border-gray-200 rounded-lg p-2 text-center outline-none focus:ring-2 focus:ring-green-400">
                             </div>
                         </div>`;
                     }).join('')}
                 </div>
             `).join('');
 
-            document.querySelectorAll('.qty-in').forEach(input => {
-                input.addEventListener('input', calculateTotal);
-            });
+            document.querySelectorAll('.qty-in').forEach(i => i.addEventListener('input', calculateTotal));
         }
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('.qty-in').forEach(input => {
-                const qty = parseFloat(input.value) || 0;
-                total += qty * (parseFloat(input.dataset.price) || 0);
+            document.querySelectorAll('.qty-in').forEach(i => {
+                total += (parseFloat(i.value) || 0) * (parseFloat(i.dataset.price) || 0);
             });
-            document.getElementById('total-val').innerText = total.toFixed(2);
+            document.getElementById('total-val').innerText = total;
             document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
         }
 
         document.getElementById('orderForm').onsubmit = (e) => {
             e.preventDefault();
-            let itemsText = "";
-            let totalOrder = 0;
-
+            let text = "*NEW ORDER*%0A";
             document.querySelectorAll('.qty-in').forEach(i => {
-                if(i.value > 0) {
-                    itemsText += `✅ ${i.dataset.name}: ${i.value}%0A`;
-                    totalOrder += (i.value * i.dataset.price);
-                }
+                if(i.value > 0) text += `• ${i.dataset.name}: ${i.value}%0A`;
             });
-
-            if(!itemsText) return alert("Please select items first!");
-
-            let msg = `*NEW ORDER - V.S. MART*%0A---------------------------%0A${itemsText}---------------------------%0A*TOTAL: ₹${totalOrder.toFixed(2)}*%0A%0A`;
-            msg += `*--- DELIVERY DETAILS ---*%0A`;
-            msg += `*Phone:* ${document.getElementById('customer_phone').value}%0A`;
-            if(googleMapsLink) msg += `*Live Location:* ${googleMapsLink}%0A`;
-            if(document.getElementById('manual_address').value) msg += `*Address:* ${document.getElementById('manual_address').value}%0A`;
-            if(document.getElementById('remarks').value) msg += `*Note:* ${document.getElementById('remarks').value}`;
-
-            window.open(`https://wa.me/${MY_WHATSAPP}?text=${msg}`, '_blank');
-        };
-
-        init();
-    </script>
-</body>
-</html>
-
-    <div id="loading">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
-        <p class="text-green-800 font-bold text-center">Loading Fresh Stock... <br> ತಾಜಾ ತರಕಾರಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...</p>
-    </div>
-
-    <header class="hero-section">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-bold uppercase mb-2">V.S. Vegetable Mart</h1>
-            <p class="text-xl md:text-2xl font-bold text-green-400 mb-2">📞 9980764852</p>
-            <p class="text-sm md:text-md font-medium tracking-widest opacity-90">Gandhi Chowka, Devanahalli</p>
-            <div class="mt-4 inline-block bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-xs md:text-sm">
-                Freshness You Can Trust • Quality You Can Taste
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4">
-        <div id="shop-container"></div>
-
-        <div class="mt-16 bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-green-100 max-w-2xl mx-auto">
-            <h2 class="text-xl font-bold text-center text-green-900 mb-6">Complete Your Order / ಆರ್ಡರ್ ಪೂರ್ಣಗೊಳಿಸಿ</h2>
-            <form id="orderForm" class="space-y-4">
-                <input type="tel" id="customer_phone" placeholder="Mobile Number / ಮೊಬೈಲ್ ಸಂಖ್ಯೆ *" required class="w-full p-4 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-green-500">
-                
-                <div class="space-y-2">
-                    <button type="button" id="getLocation" class="location-btn w-full p-4 border-2 border-dashed border-green-500 rounded-xl text-green-700 font-semibold flex items-center justify-center gap-2 hover:bg-green-50">
-                        📍 Share My Live Location / ಲೈವ್ ಲೊಕೇಶನ್
-                    </button>
-                    <input type="text" id="manual_address" placeholder="Or type Address manually / ಅಥವಾ ವಿಳಾಸ ಟೈಪ್ ಮಾಡಿ" class="w-full p-4 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-
-                <textarea id="remarks" placeholder="Special notes? (Landmark, Change for 500, etc.)" class="w-full p-4 border rounded-xl bg-gray-50 h-24 outline-none focus:ring-2 focus:ring-green-500"></textarea>
-                
-                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg hover:bg-green-800 text-lg transition active:scale-95">
-                    SEND ORDER ON WHATSAPP
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <div id="cart-total" class="total-banner">
-        Current Total: ₹<span id="total-val">0</span>
-    </div>
-
-    <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
-        const MY_WHATSAPP = '919980764852'; // Updated number here
-        let googleMapsLink = "";
-
-        // Get Location Logic
-        document.getElementById('getLocation').onclick = function() {
-            const btn = this;
-            if (navigator.geolocation) {
-                btn.innerText = "⌛ Detecting... / ಪತ್ತೆ ಮಾಡಲಾಗುತ್ತಿದೆ...";
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-                        btn.innerText = "✅ Location Saved! / ಲೊಕೇಶನ್ ಸೇವ್ ಆಗಿದೆ";
-                        btn.classList.add('location-ready');
-                    },
-                    () => {
-                        alert("Please enable GPS/Location access.");
-                        btn.innerText = "❌ Error Detection Location";
-                    }
-                );
-            }
-        };
-
-        async function init() {
-            try {
-                const res = await fetch(SHEET_URL);
-                const csv = await res.text();
-                const items = parseCSV(csv);
-                renderItems(items);
-                document.getElementById('loading').style.display = 'none';
-            } catch (e) {
-                alert("Error loading items. Please check your internet.");
-            }
-        }
-
-        function parseCSV(text) {
-            const rows = text.trim().split('\n');
-            const headers = rows[0].split(',').map(h => h.trim());
-            return rows.slice(1).map(row => {
-                const values = row.split(',').map(v => v.trim());
-                return headers.reduce((obj, h, i) => { obj[h] = values[i]; return obj; }, {});
-            });
-        }
-
-        function renderItems(items) {
-            const container = document.getElementById('shop-container');
-            const categories = [...new Set(items.map(i => i.Category))];
-            
-            container.innerHTML = categories.map(cat => `
-                <h2 class="category-header">${cat}</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    ${items.filter(i => i.Category === cat).map(item => {
-                        const img = item.ImageURL || 'https://cdn-icons-png.flaticon.com/512/2329/2329865.png';
-                        return `
-                        <div class="veg-card">
-                            <img src="${img}" alt="${item.Name}" class="veg-image" loading="lazy">
-                            <div class="p-3">
-                                <h3 class="font-bold text-gray-800 text-sm">${item.Name}</h3>
-                                <p class="text-[9px] text-gray-500 uppercase">${item.KannadaName}</p>
-                                <p class="text-green-600 font-bold mt-1 text-sm">₹${item.Price} / ${item.Unit}</p>
-                                <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
-                                       class="qty-in mt-3 w-full border border-gray-200 rounded-lg p-2 text-center text-sm outline-none focus:ring-2 focus:ring-green-400">
-                            </div>
-                        </div>`;
-                    }).join('')}
-                </div>
-            `).join('');
-
-            document.querySelectorAll('.qty-in').forEach(input => {
-                input.addEventListener('input', calculateTotal);
-            });
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('.qty-in').forEach(input => {
-                const qty = parseFloat(input.value) || 0;
-                const price = parseFloat(input.dataset.price) || 0;
-                total += qty * price;
-            });
-            const banner = document.getElementById('cart-total');
-            document.getElementById('total-val').innerText = total;
-            banner.style.display = total > 0 ? 'block' : 'none';
-        }
-
-        document.getElementById('orderForm').onsubmit = (e) => {
-            e.preventDefault();
-            let text = "*NEW ORDER - V.S. MART*%0A---------------------------%0A";
-            let hasItems = false;
-            let totalOrder = 0;
-
-            document.querySelectorAll('.qty-in').forEach(i => {
-                if(i.value > 0) {
-                    text += `• ${i.dataset.name}: ${i.value}%0A`;
-                    totalOrder += (i.value * i.dataset.price);
-                    hasItems = true;
-                }
-            });
-
-            if(!hasItems) return alert("Please select at least one item!");
-
-            text += `---------------------------%0A*TOTAL: ₹${totalOrder}*%0A%0A`;
-            text += `*--- CUSTOMER INFO ---*%0A`;
-            text += `*Phone:* ${document.getElementById('customer_phone').value}%0A`;
-            
-            if(googleMapsLink) text += `*Maps:* ${googleMapsLink}%0A`;
-            if(document.getElementById('manual_address').value) text += `*Address:* ${document.getElementById('manual_address').value}%0A`;
-            if(document.getElementById('remarks').value) text += `*Note:* ${document.getElementById('remarks').value}`;
-
+            text += `%0A*Phone:* ${document.getElementById('customer_phone').value}`;
+            if(googleMapsLink) text += `%0A*Location:* ${googleMapsLink}`;
             window.open(`https://wa.me/${MY_WHATSAPP}?text=${text}`, '_blank');
         };
 
