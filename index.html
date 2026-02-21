@@ -6,6 +6,8 @@
     <title>V.S. Vegetable Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
         .hero-bg {
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop');
@@ -22,69 +24,70 @@
 <body class="bg-gray-50 pb-24">
 
     <header class="hero-bg text-white p-8 text-center relative">
-        <button onclick="toggleHistory(true)" class="absolute top-4 right-4 bg-white/20 px-3 py-1 rounded-lg text-xs border border-white/30 backdrop-blur-sm hover:bg-white/40">📜 My Orders</button>
-        <h1 class="text-3xl font-bold tracking-tight">V.S. VEGETABLE MART</h1>
-        <p class="text-green-300 italic text-sm mt-2">"Farm fresh Vegetables for every occasion"</p>
+        <button onclick="toggleHistory(true)" class="absolute top-4 right-4 bg-white/20 px-3 py-1 rounded-lg text-xs border border-white/30 backdrop-blur-sm hover:bg-white/40">📜 ಇತಿಹಾಸ / History</button>
+        <h1 class="text-3xl font-bold tracking-tight uppercase">V.S. VEGETABLE MART</h1>
+        <p class="text-green-300 italic text-sm mt-2">"ತಾಜಾ ತರಕಾರಿಗಳು ನಿಮ್ಮ ಮನೆ ಬಾಗಿಲಿಗೆ"</p>
         <div class="mt-4 font-bold text-lg">📞 9980764752</div>
     </header>
 
     <div class="p-4 sticky top-0 bg-gray-50/95 z-50 space-y-3">
-        <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Search vegetables..." 
-               class="w-full p-4 border-2 border-green-100 rounded-2xl shadow-sm outline-none focus:border-green-600">
+        <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Search vegetables (English or ಕನ್ನಡ)..." 
+               class="w-full p-4 border-2 border-green-100 rounded-2xl shadow-sm outline-none focus:border-green-600 transition-all">
         
         <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="category-bar">
             <button onclick="setCategory('All')" class="filter-btn active whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">All</button>
             <button onclick="setCategory('Essentials')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Essentials</button>
-            <button onclick="setCategory('Leafy Greens')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Leafy Greens</button>
+            <button onclick="setCategory('Local specials')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Local specials</button>
             <button onclick="setCategory('Gourds')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Gourds</button>
+            <button onclick="setCategory('Leafy Greens')" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-green-600 text-green-800 font-medium transition">Leafy Greens</button>
         </div>
     </div>
 
     <main id="shop-container" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto"></main>
 
     <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-5 text-center font-bold hidden cursor-pointer shadow-2xl z-50 flex justify-between items-center px-8" onclick="toggleCart(true)">
-        <span>VIEW BASKET 🛒</span>
+        <span>ಬಾಸ್ಕೆಟ್ ನೋಡಿ / REVIEW BASKET</span>
         <span>TOTAL: ₹<span id="total-val">0</span></span>
     </div>
 
     <div id="cart-sidebar" class="p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
             <h2 class="font-bold text-2xl text-gray-800">Your Basket</h2>
-            <button onclick="toggleCart(false)" class="text-3xl">&times;</button>
+            <button onclick="toggleCart(false)" class="text-3xl">×</button>
         </div>
         <div id="cart-list" class="space-y-4 mb-6"></div>
         
         <div class="space-y-3 bg-gray-50 p-4 rounded-xl mb-6 border border-gray-100">
-            <h3 class="font-bold text-gray-700">Delivery Details</h3>
-            <input type="text" id="cust_name" placeholder="Full Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
-            <input type="tel" id="cust_phone" placeholder="WhatsApp Number" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+            <h3 class="font-bold text-gray-700">Delivery Details (ವಿತರಣೆ ಮಾಹಿತಿ)</h3>
+            <input type="text" id="cust_name" placeholder="Full Name (ಹೆಸರು)" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+            <input type="tel" id="cust_phone" placeholder="WhatsApp Number (ಮೊಬೈಲ್ ಸಂಖ್ಯೆ)" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
             
             <div class="space-y-2">
                 <div class="flex gap-2">
-                    <input type="text" id="cust_location" placeholder="Enter Delivery Address" class="flex-1 p-3 border rounded-xl outline-none text-sm focus:ring-2 ring-green-500">
-                    <button onclick="getLocation()" class="bg-green-100 text-green-700 px-3 rounded-xl text-xs font-bold border border-green-200 hover:bg-green-200">📍 GPS</button>
+                    <input type="text" id="cust_location" placeholder="Address or GPS link" class="flex-1 p-3 border rounded-xl outline-none text-sm focus:ring-2 ring-green-500">
+                    <button onclick="getLocation()" class="bg-green-100 text-green-700 px-3 rounded-xl text-xs font-bold border border-green-200">📍 GET GPS</button>
                 </div>
-                <p class="text-[10px] text-gray-400 px-1">* Type manually or use GPS for exact location</p>
+                <p class="text-[10px] text-gray-500 italic">* You can type address manually or use GPS button.</p>
             </div>
         </div>
 
-        <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition shadow-lg">ORDER VIA WHATSAPP</button>
+        <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition shadow-lg">ORDER ON WHATSAPP</button>
     </div>
 
     <div id="history-sidebar" class="p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
             <h2 class="font-bold text-2xl text-gray-800">Order History</h2>
-            <button onclick="toggleHistory(false)" class="text-3xl">&times;</button>
+            <button onclick="toggleHistory(false)" class="text-3xl">×</button>
         </div>
         <div class="mb-6">
-            <label class="text-xs font-bold text-gray-600 uppercase">Track by Phone Number</label>
-            <div class="flex gap-2 mt-1">
-                <input type="tel" id="history_phone" placeholder="Enter Mobile Number" class="flex-1 p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
-                <button onclick="fetchHistory()" id="history-btn" class="bg-gray-800 text-white px-4 rounded-xl text-sm font-bold hover:bg-black">Search</button>
+            <p class="text-xs text-gray-500 mb-2 font-semibold">Enter your phone to see past orders:</p>
+            <div class="flex gap-2">
+                <input type="tel" id="history_phone" placeholder="Mobile Number" class="flex-1 p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+                <button onclick="fetchHistory()" id="history-btn" class="bg-gray-800 text-white px-4 rounded-xl text-sm font-bold">Search</button>
             </div>
         </div>
         <div id="history-results" class="space-y-4">
-            <div class="text-gray-400 text-center py-10 italic">Search to see your past orders</div>
+            <div class="text-gray-400 text-center py-10 italic">No search results yet</div>
         </div>
     </div>
 
@@ -105,24 +108,26 @@
                 allItems = rows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        name: cols[0]?.replace(/"/g, '').trim(), 
+                        nameEn: cols[0]?.replace(/"/g, '').trim(), 
+                        nameKn: cols[1]?.replace(/"/g, '').trim(), 
                         price: parseFloat(cols[2]) || 0,        
                         unit: cols[3]?.trim() || 'kg',          
                         category: cols[6]?.trim() || 'Other',
                         img: formatDriveUrl(cols[5]?.trim()),   
                         stock: cols[7]?.trim().toLowerCase()    
                     };
-                }).filter(i => i.name && i.stock !== 'out');
+                }).filter(i => i.nameEn && i.stock !== 'out');
                 
                 filterItems();
-            } catch (e) { console.error("Error loading inventory"); }
+            } catch (e) { console.error("Error loading items"); }
         }
 
         function formatDriveUrl(url) {
             if (!url || !url.includes('drive.google.com')) return url || 'https://via.placeholder.com/300?text=Veg';
             try {
-                const id = url.split(/\/d\/|id=/)[1].split(/[/?&]/)[0];
-                return `https://lh3.googleusercontent.com/u/0/d/${id}`;
+                const parts = url.split(/\/d\/|id=/);
+                const id = parts[1].split(/[/?&]/)[0];
+                return `https://lh3.googleusercontent.com/d/${id}`;
             } catch (e) { return url; }
         }
 
@@ -130,21 +135,22 @@
             const container = document.getElementById('shop-container');
             container.innerHTML = items.map(item => `
                 <div class="veg-card p-3 shadow-sm flex flex-col">
-                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-3 bg-gray-50" onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
-                    <h3 class="font-bold text-gray-800 text-sm truncate">${item.name}</h3>
-                    <p class="text-green-700 font-bold mb-3 text-lg">₹${item.price}<span class="text-xs text-gray-400 font-normal">/${item.unit}</span></p>
+                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-2 bg-gray-50" onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
+                    <div class="mb-1">
+                        <h3 class="font-bold text-gray-800 text-sm leading-tight">${item.nameEn}</h3>
+                        <h4 class="text-green-700 text-xs font-semibold">${item.nameKn || ''}</h4>
+                    </div>
+                    <p class="text-gray-900 font-bold mb-3 text-lg">₹${item.price}<span class="text-xs text-gray-400 font-normal">/${item.unit}</span></p>
                     <input type="number" min="0" step="any" placeholder="Qty" oninput="updateTotal()" 
-                           data-name="${item.name}" data-price="${item.price}" 
-                           class="qty-input w-full border border-gray-200 p-2 text-center rounded-lg outline-none focus:border-green-500">
+                           data-fullname="${item.nameEn} (${item.nameKn})" data-price="${item.price}" 
+                           class="qty-input w-full border border-green-100 p-2 text-center rounded-lg outline-none focus:border-green-500 bg-green-50/50">
                 </div>
             `).join('');
         }
 
         function setCategory(cat) {
             currentCategory = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === cat);
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === cat));
             filterItems();
         }
 
@@ -152,7 +158,7 @@
             const q = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allItems.filter(i => {
                 const matchesCat = (currentCategory === 'All' || i.category === currentCategory);
-                const matchesSearch = i.name.toLowerCase().includes(q);
+                const matchesSearch = i.nameEn.toLowerCase().includes(q) || (i.nameKn && i.nameKn.toLowerCase().includes(q));
                 return matchesCat && matchesSearch;
             });
             render(filtered);
@@ -160,9 +166,7 @@
 
         function updateTotal() {
             let total = 0;
-            document.querySelectorAll('.qty-input').forEach(i => {
-                total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price);
-            });
+            document.querySelectorAll('.qty-input').forEach(i => total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price));
             document.getElementById('total-val').innerText = total.toFixed(2);
             document.getElementById('cart-total').style.display = total > 0 ? 'flex' : 'none';
         }
@@ -175,22 +179,25 @@
             document.querySelectorAll('.qty-input').forEach(i => {
                 if(parseFloat(i.value) > 0) {
                     html += `<div class="flex justify-between border-b pb-2 text-sm">
-                        <span>${i.dataset.name} x ${i.value}</span>
-                        <b>₹${(i.value * i.dataset.price).toFixed(2)}</b>
-                    </div>`;
+                                <div>
+                                    <div class="font-semibold">${i.dataset.fullname}</div>
+                                    <div class="text-xs text-gray-500">Qty: ${i.value}</div>
+                                </div>
+                                <b class="text-green-700">₹${(i.value * i.dataset.price).toFixed(2)}</b>
+                             </div>`;
                 }
             });
-            document.getElementById('cart-list').innerHTML = html || "Your basket is empty!";
+            document.getElementById('cart-list').innerHTML = html || "Basket is empty / ಬುಟ್ಟಿ ಖಾಲಿಯಿದೆ";
         }
 
         function getLocation() {
+            const locInput = document.getElementById('cust_location');
             if (navigator.geolocation) {
-                const locInput = document.getElementById('cust_location');
                 locInput.value = "Fetching location...";
                 navigator.geolocation.getCurrentPosition(p => {
                     locInput.value = `https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`;
                 }, () => {
-                    alert("Location access denied. Please type your address manually.");
+                    alert("Permission denied. Please type your address manually.");
                     locInput.value = "";
                 });
             }
@@ -201,64 +208,58 @@
             const phone = document.getElementById('cust_phone').value;
             const loc = document.getElementById('cust_location').value;
             const total = document.getElementById('total-val').innerText;
+            if(!name || !phone || !loc) return alert("Please fill Name, Phone and Location");
 
-            if(!name || !phone || !loc) return alert("Please fill Name, Phone and Delivery Location");
-
-            let itemsTxt = "";
-            document.querySelectorAll('.qty-input').forEach(i => {
-                if(i.value > 0) itemsTxt += `• ${i.dataset.name}: ${i.value}\n`;
+            let itemsMsg = "";
+            document.querySelectorAll('.qty-input').forEach(i => { 
+                if(i.value > 0) itemsMsg += `• ${i.dataset.fullname}: ${i.value}\n`; 
             });
 
-            // Save to Sheet via Apps Script
+            // Post to Sheet
             try {
                 fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    cache: 'no-cache',
-                    body: JSON.stringify({ action: 'saveOrder', name, phone, location: loc, items: itemsTxt, total })
+                    body: JSON.stringify({ action: 'saveOrder', name, phone, location: loc, items: itemsMsg, total })
                 });
             } catch (e) { console.error("Cloud save failed"); }
 
-            const msg = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Location:* ${loc}\n\n*Items:*\n${itemsTxt}\n*Total Bill: ₹${total}*`);
+            const msg = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Location:* ${loc}\n\n*Items:*\n${itemsMsg}\n*Total: ₹${total}*`);
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`);
         }
 
         async function fetchHistory() {
             const phone = document.getElementById('history_phone').value;
-            if(!phone) return alert("Please enter your phone number");
+            if(!phone) return alert("Enter phone number");
 
             const btn = document.getElementById('history-btn');
             const container = document.getElementById('history-results');
-            
-            btn.disabled = true;
             btn.innerText = "Searching...";
-            container.innerHTML = `<div class="text-center py-10">Checking our records...</div>`;
             
             try {
-                const response = await fetch(SCRIPT_URL, {
+                const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'getHistory', phone: phone })
                 });
-                const history = await response.json();
+                const history = await res.json();
                 
                 if(!history || history.length === 0) {
-                    container.innerHTML = `<div class="text-center py-10 text-gray-400">No previous orders found for this number.</div>`;
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">No orders found.</div>`;
                 } else {
                     container.innerHTML = history.reverse().map(o => `
-                        <div class="bg-white border p-4 rounded-xl text-xs shadow-sm border-l-4 border-green-600">
+                        <div class="bg-white p-4 rounded-xl text-xs border border-gray-200 border-l-4 border-green-600 shadow-sm">
                             <div class="flex justify-between font-bold mb-2">
-                                <span class="text-gray-500">${new Date(o[0]).toLocaleDateString()}</span>
-                                <span class="text-green-700 text-sm">₹${o[5]}</span>
+                                <span>📅 ${new Date(o[0]).toLocaleDateString()}</span>
+                                <span class="text-green-700">₹${o[5]}</span>
                             </div>
-                            <div class="whitespace-pre-line text-gray-700 mb-2 leading-relaxed">${o[4]}</div>
-                            <div class="text-[10px] text-blue-500 truncate italic">📍 ${o[3] || 'Manual Entry'}</div>
+                            <div class="whitespace-pre-line text-gray-600 mb-2">${o[4]}</div>
+                            <div class="text-blue-500 underline truncate text-[10px]">${o[3]}</div>
                         </div>
                     `).join('');
                 }
             } catch (e) {
-                container.innerHTML = `<div class="text-red-500 text-center py-10">Failed to load history. Please try again later.</div>`;
+                container.innerHTML = "Error fetching data.";
             } finally {
-                btn.disabled = false;
                 btn.innerText = "Search";
             }
         }
