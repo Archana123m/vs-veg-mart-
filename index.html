@@ -13,107 +13,97 @@
             background-size: cover; background-position: center; padding: 40px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
         }
         .search-container { position: sticky; top: 0; z-index: 30; background: white; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .veg-card { background: white; border-radius: 1rem; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; transition: transform 0.2s; }
-        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; }
+        .veg-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; transition: 0.2s; }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; border-radius: 1rem 1rem 0 0; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; z-index: 40; display: none; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); }
+        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; z-index: 40; display: none; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); cursor: pointer; }
         .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
+        
+        #cart-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; backdrop-filter: blur(2px); }
+        #cart-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 90%; max-width: 400px; background: white; z-index: 51; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; overflow-y: auto; }
+        #cart-sidebar.active { right: 0; }
+        
+        .qty-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: 0.2s; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="loading" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600 mb-4"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-600 mb-4"></div>
         <p class="text-green-800 font-bold">V.S. Mart Loading...</p>
     </div>
 
     <header class="hero-section">
-        <h1 class="text-3xl font-bold uppercase">V.S. Vegetable Mart</h1>
-        <p class="text-xl text-green-400 font-bold mb-1">9980764852</p>
-        <p class="text-sm opacity-80">Gandhi Chowka, Devanahalli</p>
+        <h1 class="text-3xl font-bold uppercase tracking-tight">V.S. Vegetable Mart</h1>
+        <p class="text-xl text-green-400 font-bold mb-1">9980764752</p>
+        <p class="text-xs opacity-75">Gandhi Chowka, Devanahalli</p>
     </header>
 
     <div class="search-container">
         <div class="max-w-6xl mx-auto relative">
-            <input type="text" id="searchInput" onkeyup="filterVegetables()" placeholder="Search vegetables (e.g. Tomato, ಈರುಳ್ಳಿ)..." 
-                   class="w-full p-4 pl-12 border-2 border-green-100 rounded-2xl outline-none focus:border-green-500 transition shadow-sm text-sm">
-            <span class="absolute left-4 top-4 opacity-40">🔍</span>
+            <input type="text" id="searchInput" onkeyup="filterVegetables()" placeholder="Search vegetables (Tomato, ಈರುಳ್ಳಿ)..." 
+                   class="w-full p-4 pl-12 border-2 border-green-50 rounded-2xl outline-none focus:border-green-500 transition shadow-sm">
+            <span class="absolute left-4 top-4.5 opacity-30">🔍</span>
         </div>
     </div>
 
     <main class="max-w-6xl mx-auto px-4">
-        <section class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-700 mb-2 text-sm">My Orders / ನನ್ನ ಆರ್ಡರ್‌ಗಳು</h3>
-            <div class="flex gap-2">
-                <input type="tel" id="search_phone" placeholder="Mobile Number" class="flex-1 p-2 border rounded-lg outline-none text-sm">
-                <button onclick="fetchHistory()" class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold">Check</button>
-            </div>
-            <div id="history-results" class="mt-4 max-h-48 overflow-y-auto hidden space-y-2"></div>
-        </section>
-
         <div id="shop-container"></div>
-
-        <div class="mt-12 bg-white rounded-3xl p-6 shadow-xl border border-green-100 max-w-2xl mx-auto mb-10">
-            <h2 class="text-xl font-bold text-center text-green-900 mb-6">Confirm Order</h2>
-            <form id="orderForm" class="space-y-4">
-                <input type="text" id="cust_name" placeholder="Name / ಹೆಸರು *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-                <input type="tel" id="cust_phone" placeholder="Phone / ಫೋನ್ *" required class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
-                <div class="flex gap-2">
-                    <button type="button" onclick="getLocation()" id="locBtn" class="bg-blue-50 text-blue-700 border border-blue-200 p-4 rounded-xl flex-1 font-bold text-xs">📍 Share Location</button>
-                    <input type="text" id="manual_address" placeholder="Address" class="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-green-500 flex-[1.5]">
-                </div>
-                <input type="hidden" id="geo_link">
-                <button type="submit" class="w-full bg-green-700 text-white font-bold py-5 rounded-xl shadow-lg active:scale-95 transition">ORDER ON WHATSAPP</button>
-            </form>
-        </div>
     </main>
 
-    <div id="cart-total" class="total-banner">
-        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-            <div class="text-left">
-                <p class="text-xs opacity-80">Total Amount</p>
+    <div id="cart-total" class="total-banner" onclick="toggleCart(true)">
+        <div class="max-w-6xl mx-auto px-2 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] uppercase opacity-80">Review Order</p>
                 <p class="text-xl font-bold">₹<span id="total-val">0</span></p>
             </div>
-            <button onclick="clearCart()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition flex items-center gap-1">
-                <span>🔄</span> Reset
-            </button>
+            <div class="bg-white/20 px-4 py-2 rounded-xl font-bold">View Cart 🛒</div>
         </div>
     </div>
 
+    <div id="cart-overlay" onclick="toggleCart(false)"></div>
+    <div id="cart-sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-green-900">Cart Summary</h2>
+            <button onclick="toggleCart(false)" class="bg-gray-100 p-2 rounded-full">✕</button>
+        </div>
+        
+        <div id="cart-items-list" class="space-y-3 mb-8"></div>
+
+        <div class="border-t pt-4 mb-6">
+            <div class="flex justify-between text-xl font-bold text-gray-800">
+                <span>Total:</span>
+                <span class="text-green-700">₹<span id="cart-total-sidebar">0</span></span>
+            </div>
+            <button onclick="clearCart()" class="text-red-500 text-xs mt-2 font-medium">Reset All Items 🔄</button>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-2xl mb-6 space-y-3 border border-gray-100">
+            <input type="text" id="cust_name" placeholder="Full Name / ಹೆಸರು *" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
+            <input type="tel" id="cust_phone" placeholder="Phone / ಫೋನ್ *" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
+            <button type="button" onclick="getLocation()" id="locBtn" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold text-xs shadow-md">📍 Share Delivery Location</button>
+            <input type="text" id="manual_address" placeholder="Landmark / Area" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
+            <input type="hidden" id="geo_link">
+        </div>
+
+        <button onclick="submitOrder()" class="w-full bg-green-700 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition">PLACE ORDER ON WHATSAPP</button>
+    </div>
+
     <script>
+        // CONFIGURATION
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEI733W35iEKjWgoYMZ8SGr2bBTEEWx2XHU3QPzibJrs94dtTETh7RpIEaYxDkV1er/exec';
-        const WHATSAPP_NUM = '919980764852';
+        const WHATSAPP_NUM = '919980764752';
 
-        let allVegetables = [];
-
-        function fixImageUrl(url, name) {
-            if (url && url.includes('drive.google.com')) {
-                const id = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
-                return `https://lh3.googleusercontent.com/u/0/d/${id}`;
-            }
-            return url && url.length > 5 ? url : `https://source.unsplash.com/featured/400x400?${name},vegetable`;
-        }
-
-        function getLocation() {
-            const btn = document.getElementById('locBtn');
-            if (navigator.geolocation) {
-                btn.innerText = "⌛ Locating...";
-                navigator.geolocation.getCurrentPosition(pos => {
-                    document.getElementById('geo_link').value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                    btn.innerText = "✅ Saved";
-                    btn.classList.replace('bg-blue-50', 'bg-green-100');
-                }, () => alert("Enable GPS for location sharing."));
-            }
-        }
+        let allItems = [];
 
         async function init() {
             try {
                 const res = await fetch(SHEET_URL);
                 const csv = await res.text();
-                const items = parseCSV(csv);
-                allVegetables = items.filter(item => !item.Stock || item.Stock.toLowerCase() === 'in');
-                renderItems(allVegetables);
+                const data = parseCSV(csv);
+                allItems = data.filter(i => !i.Stock || i.Stock.toLowerCase() === 'in');
+                renderItems(allItems);
                 document.getElementById('loading').style.display = 'none';
             } catch (e) { console.error(e); }
         }
@@ -130,80 +120,127 @@
         function renderItems(items) {
             const container = document.getElementById('shop-container');
             const categories = [...new Set(items.map(i => i.Category))];
-            
-            if (items.length === 0) {
-                container.innerHTML = `<div class="text-center py-10"><p class="text-gray-400">No items found.</p></div>`;
-                return;
-            }
-
             container.innerHTML = categories.map(cat => `
-                <div class="category-block">
-                    <h2 class="category-header">${cat}</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${items.filter(i => i.Category === cat).map(item => `
-                            <div class="veg-card">
-                                <div class="img-container">
-                                    <img src="${fixImageUrl(item.ImageURL, item.Name)}" class="veg-image" onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
-                                </div>
-                                <div class="p-3">
-                                    <h3 class="font-bold text-sm leading-tight">${item.Name}</h3>
-                                    <p class="text-[10px] text-gray-400 italic">${item.KannadaName || ''}</p>
-                                    <p class="text-green-600 font-bold text-sm mt-1">₹${item.Price} / ${item.Unit}</p>
-                                    <input type="number" min="0" placeholder="Qty" data-name="${item.Name}" data-price="${item.Price}" 
-                                           class="qty-in mt-2 w-full border rounded-lg p-2 text-center text-sm outline-none focus:ring-1 focus:ring-green-400">
-                                </div>
+                <h2 class="category-header">${cat}</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    ${items.filter(i => i.Category === cat).map(item => `
+                        <div class="veg-card">
+                            <div class="img-container">
+                                <img src="${fixImageUrl(item.ImageURL, item.Name)}" class="veg-image" onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
                             </div>
-                        `).join('')}
-                    </div>
+                            <div class="p-3">
+                                <h3 class="font-bold text-sm leading-tight h-10">${item.Name}</h3>
+                                <p class="text-green-600 font-bold text-sm">₹${item.Price} / ${item.Unit}</p>
+                                <input type="number" min="0" id="input-${item.Name.replace(/\s+/g, '')}" data-name="${item.Name}" data-price="${item.Price}" 
+                                       class="qty-in mt-2 w-full border rounded-lg p-2 text-center text-sm outline-none focus:ring-1 focus:ring-green-400" onchange="calculateTotal()">
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `).join('');
-            document.querySelectorAll('.qty-in').forEach(i => i.addEventListener('input', calculateTotal));
+        }
+
+        function changeQty(name, delta) {
+            const id = `input-${name.replace(/\s+/g, '')}`;
+            const input = document.getElementById(id);
+            if(input) {
+                let val = parseInt(input.value) || 0;
+                input.value = Math.max(0, val + delta);
+                calculateTotal();
+                updateCartUI();
+            }
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-items-list');
+            let total = 0;
+            let html = "";
+            document.querySelectorAll('.qty-in').forEach(i => {
+                if(i.value > 0) {
+                    const price = parseFloat(i.dataset.price);
+                    const qty = parseInt(i.value);
+                    total += price * qty;
+                    html += `
+                        <div class="flex justify-between items-center bg-white border p-3 rounded-xl shadow-sm">
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-gray-800">${i.dataset.name}</p>
+                                <p class="text-xs text-green-600 font-bold">₹${price * qty}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeQty('${i.dataset.name}', -1)" class="qty-btn bg-gray-100 text-gray-600">-</button>
+                                <span class="font-bold w-4 text-center">${qty}</span>
+                                <button onclick="changeQty('${i.dataset.name}', 1)" class="qty-btn bg-green-100 text-green-700">+</button>
+                            </div>
+                        </div>`;
+                }
+            });
+            list.innerHTML = html || `<p class="text-gray-400 text-center py-10">Your cart is empty.</p>`;
+            document.getElementById('cart-total-sidebar').innerText = total;
+        }
+
+        function toggleCart(show) {
+            document.getElementById('cart-sidebar').classList.toggle('active', show);
+            document.getElementById('cart-overlay').style.display = show ? 'block' : 'none';
+            if(show) updateCartUI();
+        }
+
+        function fixImageUrl(url, name) {
+            if (url && url.includes('drive.google.com')) {
+                const id = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
+                return `https://lh3.googleusercontent.com/d/${id}`;
+            }
+            return url && url.length > 5 ? url : `https://source.unsplash.com/featured/400x400?${name},vegetable`;
+        }
+
+        function getLocation() {
+            const btn = document.getElementById('locBtn');
+            if (navigator.geolocation) {
+                btn.innerText = "⌛ Detecting...";
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('geo_link').value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    btn.innerText = "✅ Location Locked";
+                    btn.className = "w-full bg-green-100 text-green-700 p-3 rounded-xl font-bold text-xs";
+                }, () => alert("Please enable GPS."));
+            }
         }
 
         function filterVegetables() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allVegetables.filter(item => 
-                item.Name.toLowerCase().includes(query) || 
-                (item.KannadaName && item.KannadaName.toLowerCase().includes(query))
-            );
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allItems.filter(i => i.Name.toLowerCase().includes(q) || (i.KannadaName && i.KannadaName.toLowerCase().includes(q)));
             renderItems(filtered);
         }
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('.qty-in').forEach(i => total += (parseFloat(i.value) || 0) * (parseFloat(i.dataset.price) || 0));
+            document.querySelectorAll('.qty-in').forEach(i => total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price));
             document.getElementById('total-val').innerText = total;
             document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
         }
 
         function clearCart() {
-            if(confirm("Clear your shopping list?")) {
+            if(confirm("Empty your cart?")) {
                 document.querySelectorAll('.qty-in').forEach(i => i.value = "");
                 calculateTotal();
+                toggleCart(false);
             }
         }
 
-        document.getElementById('orderForm').onsubmit = async (e) => {
-            e.preventDefault();
+        async function submitOrder() {
             let details = "";
             let total = document.getElementById('total-val').innerText;
-            if(total == "0") return alert("Cart is empty!");
+            const name = document.getElementById('cust_name').value;
+            const phone = document.getElementById('cust_phone').value;
+
+            if(!name || !phone) return alert("Please fill Name and Phone!");
 
             document.querySelectorAll('.qty-in').forEach(i => { if(i.value > 0) details += `${i.dataset.name}(${i.value}), `; });
 
-            const orderData = {
-                name: document.getElementById('cust_name').value,
-                phone: document.getElementById('cust_phone').value,
-                details: details,
-                amount: total,
-                location: document.getElementById('geo_link').value || document.getElementById('manual_address').value
-            };
-
+            const orderData = { name, phone, details, amount: total, location: document.getElementById('geo_link').value || document.getElementById('manual_address').value };
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
 
-            const waMsg = `*V.S. MART ORDER*%0A*Name:* ${orderData.name}%0A*Items:* ${details}%0A*Total:* ₹${total}%0A*Address:* ${orderData.location}`;
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${waMsg}`, '_blank');
-        };
+            const msg = `*V.S. MART ORDER*%0A*Name:* ${name}%0A*Items:* ${details}%0A*Total:* ₹${total}%0A*Address:* ${orderData.location}`;
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`, '_blank');
+        }
 
         init();
     </script>
