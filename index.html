@@ -8,43 +8,85 @@
     <style>
         .hero-bg {
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                        url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop');
+                        url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1350&q=80');
             background-size: cover; background-position: center;
         }
-        .veg-card { border: 1px solid #f0f0f0; border-radius: 15px; background: white; transition: 0.3s; }
-        #cart-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 400px; background: white; z-index: 1000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
-        #cart-sidebar.active { right: 0; }
+        .veg-card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: white; }
+        #cart-sidebar, #order-history-sidebar { 
+            position: fixed; right: -100%; top: 0; bottom: 0; 
+            width: 100%; max-width: 450px; background: white; 
+            z-index: 10000; transition: 0.3s; padding: 20px; 
+            box-shadow: -10px 0 30px rgba(0,0,0,0.2); overflow-y: auto; 
+        }
+        .active { right: 0 !important; }
     </style>
 </head>
-<body class="bg-gray-50 pb-20">
+<body class="bg-gray-50 pb-24">
 
-    <header class="hero-bg text-white p-8 text-center">
-        <h1 class="text-3xl font-bold tracking-tight">V.S. VEGETABLE MART</h1>
-        <p class="text-green-300 italic text-sm mt-2">"Farm fresh Vegetables are provided for all kind of occasions"</p>
-        <div class="mt-4 font-bold text-lg">📞 9980764752</div>
+    <header class="hero-bg text-white p-8 text-center shadow-lg">
+        <h1 class="text-3xl font-extrabold mb-2">V.S. VEGETABLE MART</h1>
+        <p class="text-green-300 italic mb-4">"Farm fresh Vegetables are provided for all kind of occasions"</p>
+        <div class="flex flex-wrap justify-center gap-3 mt-4">
+            <span class="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-bold">📞 9980764752</span>
+            <button onclick="toggleHistory(true)" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-full text-sm font-bold shadow-md">📜 Order History</button>
+        </div>
     </header>
 
-    <div class="p-4 sticky top-0 bg-gray-50/95 z-50">
-        <input type="text" id="searchInput" onkeyup="filterVeg()" placeholder="Search vegetables (English)..." 
-               class="w-full p-4 border-2 border-green-100 rounded-2xl shadow-sm outline-none focus:border-green-600">
+    <div class="p-4 max-w-4xl mx-auto sticky top-0 bg-gray-50/90 z-40">
+        <input type="text" id="searchInput" onkeyup="filterVeg()" placeholder="Search vegetables (English)..." class="w-full p-4 border-2 border-green-100 rounded-xl outline-none focus:border-green-600 shadow-sm">
     </div>
 
     <main id="shop-container" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto"></main>
 
-    <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-5 text-center font-bold hidden cursor-pointer shadow-2xl z-50" onclick="toggleCart(true)">
-        REVIEW ORDER & TOTAL: ₹<span id="total-val">0</span>
+    <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-4 text-center font-bold hidden z-50 cursor-pointer" onclick="toggleCart(true)">
+        REVIEW ORDER & DELIVERY: ₹<span id="total-val">0</span>
     </div>
 
-    <div id="cart-sidebar" class="p-6 overflow-y-auto">
+    <div id="cart-sidebar">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h2 class="font-bold text-2xl">Your Basket</h2>
-            <button onclick="toggleCart(false)" class="text-3xl">&times;</button>
+            <h2 class="font-bold text-2xl">Checkout</h2>
+            <button onclick="toggleCart(false)" class="text-3xl">×</button>
         </div>
-        <div id="cart-list" class="space-y-4 mb-8"></div>
+        
+        <div id="cart-list" class="space-y-3 mb-8 max-h-60 overflow-y-auto p-2 bg-gray-50 rounded"></div>
+        
         <div class="space-y-4">
-            <input type="text" id="cust_name" placeholder="Enter Your Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
-            <input type="tel" id="cust_phone" placeholder="WhatsApp Number" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
-            <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition">ORDER ON WHATSAPP</button>
+            <h3 class="font-bold text-lg text-green-800">Customer Details (Optional)</h3>
+            <input type="text" id="cust_name" placeholder="Full Name" class="w-full p-3 border rounded-lg outline-none focus:ring-2 ring-green-500">
+            <input type="tel" id="cust_phone" placeholder="WhatsApp Number" class="w-full p-3 border rounded-lg outline-none focus:ring-2 ring-green-500">
+            
+            <div class="space-y-2">
+                <div class="flex gap-2">
+                    <input type="text" id="cust_address" placeholder="Delivery Address or Location" class="flex-1 p-3 border rounded-lg outline-none">
+                    <button onclick="getLocation()" class="bg-blue-600 text-white px-3 rounded-lg text-xs font-bold shadow-sm">📍 GPS</button>
+                </div>
+                <p id="geo-status" class="text-xs text-gray-500 italic"></p>
+            </div>
+
+            <button onclick="sendOrder()" class="w-full bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-green-800 transition">SEND ORDER ON WHATSAPP</button>
+        </div>
+    </div>
+
+    <div id="order-history-sidebar">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h2 class="font-bold text-2xl text-green-800">Past Orders</h2>
+            <button onclick="toggleHistory(false)" class="text-3xl">×</button>
+        </div>
+        
+        <div class="mb-6">
+            <p class="text-sm text-gray-600 mb-2 font-semibold italic text-green-700">Vendor/Customer: Enter mobile number to view history</p>
+            <div class="flex gap-2">
+                <input type="tel" id="history_search_phone" placeholder="Enter Phone Number" class="flex-1 p-3 border rounded-lg outline-none focus:ring-2 ring-green-500">
+                <button onclick="searchHistory()" class="bg-green-600 text-white px-4 rounded-lg font-bold">Search</button>
+            </div>
+        </div>
+
+        <div id="history-results" class="space-y-4 pb-10">
+            <p class="text-center text-gray-400 mt-10 italic">Enter a phone number above to find orders.</p>
+        </div>
+
+        <div id="vendor-tools" class="mt-10 border-t pt-4 hidden">
+            <button onclick="clearHistory()" class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm font-bold hover:bg-red-50 transition">🗑 Clear This Device History</button>
         </div>
     </div>
 
@@ -54,47 +96,43 @@
         let allItems = [];
 
         function formatDriveUrl(url) {
-            if (!url || !url.includes('drive.google.com')) return url || 'https://via.placeholder.com/300?text=No+Image';
+            if (!url || !url.includes('drive.google.com')) return url;
             try {
-                // Extracts the ID regardless of link format (sharing link or direct link)
-                const parts = url.split(/\/d\/|id=/);
-                const id = parts[1].split(/[/?&]/)[0];
-                return `https://lh3.googleusercontent.com/u/0/d/${id}=w400-h400-p`;
+                const id = url.match(/[-\w]{25,}/)[0];
+                return `https://docs.google.com/uc?export=view&id=${id}`;
             } catch (e) { return url; }
         }
 
         async function loadData() {
             try {
-                const res = await fetch(SHEET_URL);
-                const csv = await res.text();
-                const rows = csv.split(/\r?\n/).filter(r => r.trim()).slice(1);
-                
+                const response = await fetch(SHEET_URL);
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).filter(r => r.trim()).slice(1);
                 allItems = rows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        name: cols[0]?.replace(/"/g, '').trim(), // English Name (Column A)
-                        price: parseFloat(cols[2]) || 0,        // Price (Column C)
-                        unit: cols[3]?.trim() || 'kg',          // Unit (Column D)
-                        img: formatDriveUrl(cols[5]?.trim()),   // Image (Column F)
-                        stock: cols[7]?.trim().toLowerCase()    // Stock (Column H)
+                        name: cols[0]?.replace(/"/g, '').trim(), 
+                        price: parseFloat(cols[2]) || 0,        
+                        unit: cols[3]?.trim() || 'kg',          
+                        img: formatDriveUrl(cols[5]?.trim()),   
+                        stock: cols[7]?.trim().toLowerCase()    
                     };
                 }).filter(i => i.name && i.stock !== 'out');
-                
                 render(allItems);
-            } catch (e) { alert("Error loading shop data."); }
+            } catch (e) { console.error("Data error", e); }
         }
 
         function render(items) {
             const container = document.getElementById('shop-container');
             container.innerHTML = items.map(item => `
                 <div class="veg-card p-3 shadow-sm flex flex-col">
-                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-3 bg-gray-100" 
-                         onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
-                    <h3 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h3>
-                    <p class="text-green-700 font-bold mb-3 text-lg">₹${item.price}<span class="text-xs text-gray-400 font-normal">/${item.unit}</span></p>
-                    <input type="number" min="0" placeholder="Qty" oninput="updateTotal()" 
+                    <img src="${item.img}" class="w-full h-32 object-cover rounded-lg mb-2 bg-gray-100" onerror="this.src='https://via.placeholder.com/300?text=${item.name}'">
+                    <h3 class="font-bold text-gray-800 text-xs md:text-sm truncate">${item.name}</h3>
+                    <p class="text-green-700 font-bold mb-2">₹${item.price}/${item.unit}</p>
+                    <input type="number" min="0" step="any" placeholder="Qty" oninput="updateTotal()" 
+                           id="qty-${item.name.replace(/\s+/g, '-')}"
                            data-name="${item.name}" data-price="${item.price}" 
-                           class="qty-input w-full border border-gray-100 p-2 text-center rounded-lg outline-none focus:border-green-500">
+                           class="qty-input w-full border p-2 text-center rounded-lg outline-none focus:border-green-600">
                 </div>
             `).join('');
         }
@@ -106,34 +144,80 @@
             document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
         }
 
-        function toggleCart(show) { document.getElementById('cart-sidebar').classList.toggle('active', show); if(show) updateCartList(); }
+        function toggleCart(show) {
+            document.getElementById('cart-sidebar').classList.toggle('active', show);
+            if(show) {
+                let html = "";
+                document.querySelectorAll('.qty-input').forEach(i => {
+                    if(parseFloat(i.value) > 0) html += `<div class="flex justify-between border-b pb-2 text-sm"><span>${i.dataset.name} x ${i.value}</span><b>₹${(i.value * i.dataset.price).toFixed(2)}</b></div>`;
+                });
+                document.getElementById('cart-list').innerHTML = html || "Basket is empty";
+            }
+        }
 
-        function updateCartList() {
-            let html = "";
-            document.querySelectorAll('.qty-input').forEach(i => {
-                if(parseFloat(i.value) > 0) {
-                    html += `<div class="flex justify-between border-b pb-2"><span>${i.dataset.name} x ${i.value}</span><b>₹${(i.value * i.dataset.price).toFixed(2)}</b></div>`;
-                }
-            });
-            document.getElementById('cart-list').innerHTML = html || "Basket is empty";
+        function toggleHistory(show) { 
+            document.getElementById('order-history-sidebar').classList.toggle('active', show);
+            if(show) {
+                const history = JSON.parse(localStorage.getItem('vs_orders') || '[]');
+                document.getElementById('vendor-tools').classList.toggle('hidden', history.length === 0);
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Delete all order records from this device? This cannot be undone.")) {
+                localStorage.removeItem('vs_orders');
+                searchHistory();
+                toggleHistory(false);
+            }
+        }
+
+        function getLocation() {
+            const status = document.getElementById('geo-status');
+            if (!navigator.geolocation) { status.textContent = "GPS not supported"; return; }
+            status.textContent = "Getting coordinates...";
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const url = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('cust_address').value = `📍 GPS: ${url}`;
+                    status.textContent = "Location linked!";
+                },
+                () => { status.textContent = "Please allow location access."; }
+            );
         }
 
         function sendOrder() {
-            const name = document.getElementById('cust_name').value;
-            const phone = document.getElementById('cust_phone').value;
-            if(!name || !phone) return alert("Please enter Name and Phone Number");
-            let items = "";
-            document.querySelectorAll('.qty-input').forEach(i => { if(i.value > 0) items += `• ${i.dataset.name}: ${i.value}\n`; });
-            const msg = encodeURIComponent(`*ORDER - V.S. VEGETABLE MART*\n\nName: ${name}\nPhone: ${phone}\n\n*Items:*\n${items}\n*Total: ₹${document.getElementById('total-val').innerText}*`);
+            const name = document.getElementById('cust_name').value || "Customer";
+            const phone = document.getElementById('cust_phone').value || "N/A";
+            const address = document.getElementById('cust_address').value || "Manual Delivery/Pickup";
+            const total = document.getElementById('total-val').innerText;
+            
+            let itemStr = "";
+            let itemsForStorage = [];
+            document.querySelectorAll('.qty-input').forEach(i => {
+                const val = parseFloat(i.value);
+                if(val > 0) {
+                    itemStr += `• ${i.dataset.name}: ${val}\n`;
+                    itemsForStorage.push({name: i.dataset.name, qty: val});
+                }
+            });
+
+            const history = JSON.parse(localStorage.getItem('vs_orders') || '[]');
+            history.push({ 
+                date: new Date().toLocaleString(), 
+                phone: phone, 
+                items: itemsForStorage, 
+                total: total 
+            });
+            localStorage.setItem('vs_orders', JSON.stringify(history));
+
+            const msg = encodeURIComponent(`*NEW ORDER - V.S. VEGETABLE MART*\n\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Location: ${address}\n\n*ITEMS:*\n${itemStr}\n*TOTAL: ₹${total}*`);
             window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`);
         }
 
-        function filterVeg() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            render(allItems.filter(i => i.name.toLowerCase().includes(q)));
-        }
-
-        loadData();
-    </script>
-</body>
-</html>
+        function reorder(index) {
+            const searchPhone = document.getElementById('history_search_phone').value.trim();
+            const history = JSON.parse(localStorage.getItem('vs_orders') || '[]');
+            const filtered = history.filter(o => o.phone.includes(searchPhone)).reverse();
+            const order = filtered[index];
+            if(!order
+               
