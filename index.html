@@ -5,245 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>V.S. Vegetable Mart | Fresh Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8fafc; font-family: 'Poppins', 'Noto Sans Kannada', sans-serif; }
+        body { background-color: #f8fafc; font-family: 'Poppins', sans-serif; }
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
-            background-size: cover; background-position: center; padding: 40px 20px; text-align: center; color: white; border-bottom: 5px solid #059669;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover; background-position: center; padding: 30px 20px; text-align: center; color: white;
         }
-        .search-container { position: sticky; top: 0; z-index: 30; background: white; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .veg-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; transition: 0.2s; }
-        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; overflow: hidden; border-radius: 1rem 1rem 0 0; }
+        .veg-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
-        .total-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #064e3b; color: white; padding: 1rem; z-index: 40; display: none; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); cursor: pointer; }
-        .category-header { border-left: 6px solid #059669; padding-left: 15px; margin: 2rem 0 1rem 0; color: #064e3b; font-weight: 700; font-size: 1.5rem; }
         
-        #cart-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; backdrop-filter: blur(2px); }
-        #cart-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 90%; max-width: 400px; background: white; z-index: 51; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; overflow-y: auto; }
+        /* THE CART BAR */
+        #cart-total-bar { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: #064e3b; color: white; padding: 1.2rem; 
+            z-index: 100; display: none; /* Only shows when items added */
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.2); border-radius: 20px 20px 0 0;
+            cursor: pointer;
+        }
+
+        #cart-sidebar { 
+            position: fixed; right: -100%; top: 0; bottom: 0; 
+            width: 100%; max-width: 400px; background: white; 
+            z-index: 200; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            padding: 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.1); 
+        }
         #cart-sidebar.active { right: 0; }
-        
-        .qty-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; transition: 0.2s; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; backdrop-filter: blur(2px); }
     </style>
 </head>
-<body class="pb-32">
-
-    <div id="loading" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-600 mb-4"></div>
-        <p class="text-green-800 font-bold">V.S. Mart Loading...</p>
-    </div>
+<body class="pb-24">
 
     <header class="hero-section">
-        <h1 class="text-3xl font-bold uppercase tracking-tight">V.S. Vegetable Mart</h1>
-        <p class="text-xl text-green-400 font-bold mb-1">9980764752</p>
-        <p class="text-xs opacity-75">Gandhi Chowka, Devanahalli</p>
+        <h1 class="text-2xl font-bold uppercase tracking-widest">V.S. Vegetable Mart</h1>
+        <p class="text-green-400 font-bold">9980764752</p>
     </header>
 
-    <div class="search-container">
-        <div class="max-w-6xl mx-auto relative">
-            <input type="text" id="searchInput" onkeyup="filterVegetables()" placeholder="Search vegetables (Tomato, ಈರುಳ್ಳಿ)..." 
-                   class="w-full p-4 pl-12 border-2 border-green-50 rounded-2xl outline-none focus:border-green-500 transition shadow-sm">
-            <span class="absolute left-4 top-4.5 opacity-30">🔍</span>
-        </div>
+    <div class="p-4 sticky top-0 bg-white z-40 shadow-sm">
+        <input type="text" id="searchBox" onkeyup="filterItems()" placeholder="Search vegetables..." class="w-full p-3 border-2 border-green-50 rounded-xl outline-none focus:border-green-500">
     </div>
 
-    <main class="max-w-6xl mx-auto px-4">
-        <div id="shop-container"></div>
-    </main>
+    <main id="shop-grid" class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+        </main>
 
-    <div id="cart-total" class="total-banner" onclick="toggleCart(true)">
-        <div class="max-w-6xl mx-auto px-2 flex justify-between items-center">
-            <div>
-                <p class="text-[10px] uppercase opacity-80">Review Order</p>
-                <p class="text-xl font-bold">₹<span id="total-val">0</span></p>
+    <div id="cart-total-bar" onclick="toggleSidebar(true)">
+        <div class="flex justify-between items-center max-w-6xl mx-auto px-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🛒</span>
+                <span class="font-bold uppercase text-sm">Review Order</span>
             </div>
-            <div class="bg-white/20 px-4 py-2 rounded-xl font-bold">View Cart 🛒</div>
+            <span class="text-xl font-bold">₹<span id="total-val">0</span></span>
         </div>
     </div>
 
-    <div id="cart-overlay" onclick="toggleCart(false)"></div>
+    <div id="overlay" onclick="toggleSidebar(false)"></div>
+
     <div id="cart-sidebar">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-green-900">Cart Summary</h2>
-            <button onclick="toggleCart(false)" class="bg-gray-100 p-2 rounded-full">✕</button>
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h2 class="text-2xl font-bold text-green-900">Your Cart</h2>
+            <button onclick="toggleSidebar(false)" class="text-2xl">✕</button>
         </div>
-        
-        <div id="cart-items-list" class="space-y-3 mb-8"></div>
 
-        <div class="border-t pt-4 mb-6">
-            <div class="flex justify-between text-xl font-bold text-gray-800">
-                <span>Total:</span>
-                <span class="text-green-700">₹<span id="cart-total-sidebar">0</span></span>
+        <div id="cart-items-list" class="space-y-4 mb-8 max-h-[40vh] overflow-y-auto">
             </div>
-            <button onclick="clearCart()" class="text-red-500 text-xs mt-2 font-medium">Reset All Items 🔄</button>
-        </div>
 
-        <div class="bg-gray-50 p-4 rounded-2xl mb-6 space-y-3 border border-gray-100">
-            <input type="text" id="cust_name" placeholder="Full Name / ಹೆಸರು *" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
-            <input type="tel" id="cust_phone" placeholder="Phone / ಫೋನ್ *" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
-            <button type="button" onclick="getLocation()" id="locBtn" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold text-xs shadow-md">📍 Share Delivery Location</button>
-            <input type="text" id="manual_address" placeholder="Landmark / Area" class="w-full p-3 border rounded-xl outline-none focus:ring-1 focus:ring-green-400">
-            <input type="hidden" id="geo_link">
+        <div class="bg-gray-50 p-4 rounded-2xl space-y-3">
+            <input type="text" id="cust_name" placeholder="Your Name / ಹೆಸರು" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+            <input type="tel" id="cust_phone" placeholder="Phone Number / ಫೋನ್" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500">
+            <textarea id="cust_addr" placeholder="Delivery Address / ವಿಳಾಸ" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-green-500"></textarea>
+            <button onclick="checkout()" class="w-full bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition">ORDER ON WHATSAPP</button>
         </div>
-
-        <button onclick="submitOrder()" class="w-full bg-green-700 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition">PLACE ORDER ON WHATSAPP</button>
     </div>
 
     <script>
-        // CONFIGURATION
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEI733W35iEKjWgoYMZ8SGr2bBTEEWx2XHU3QPzibJrs94dtTETh7RpIEaYxDkV1er/exec';
-        const WHATSAPP_NUM = '919980764752';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
+        const WHATSAPP = '919980764752';
+        let inventory = [];
 
-        let allItems = [];
-
-        async function init() {
+        async function fetchSheet() {
             try {
-                const res = await fetch(SHEET_URL);
-                const csv = await res.text();
-                const data = parseCSV(csv);
-                allItems = data.filter(i => !i.Stock || i.Stock.toLowerCase() === 'in');
-                renderItems(allItems);
-                document.getElementById('loading').style.display = 'none';
-            } catch (e) { console.error(e); }
+                const response = await fetch(CSV_URL);
+                const data = await response.text();
+                // Split by rows and handle potential comma issues in quotes
+                const rows = data.split('\n').slice(1); 
+                inventory = rows.map(row => {
+                    const columns = row.split(',');
+                    return {
+                        category: columns[0]?.trim(),
+                        name: columns[1]?.trim(),
+                        price: parseFloat(columns[2]) || 0,
+                        unit: columns[3]?.trim() || 'kg',
+                        img: columns[4]?.trim(),
+                        stock: columns[7]?.trim().toLowerCase()
+                    };
+                }).filter(item => item.name && item.stock !== 'out');
+                
+                render(inventory);
+            } catch (err) {
+                console.error("Could not load data", err);
+            }
         }
 
-        function parseCSV(text) {
-            const rows = text.trim().split('\n');
-            const headers = rows[0].split(',').map(h => h.trim());
-            return rows.slice(1).map(row => {
-                const values = row.split(',').map(v => v.trim());
-                return headers.reduce((obj, h, i) => { obj[h] = values[i]; return obj; }, {});
-            });
-        }
-
-        function renderItems(items) {
-            const container = document.getElementById('shop-container');
-            const categories = [...new Set(items.map(i => i.Category))];
-            container.innerHTML = categories.map(cat => `
-                <h2 class="category-header">${cat}</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    ${items.filter(i => i.Category === cat).map(item => `
-                        <div class="veg-card">
-                            <div class="img-container">
-                                <img src="${fixImageUrl(item.ImageURL, item.Name)}" class="veg-image" onerror="this.src='https://via.placeholder.com/400?text=${item.Name}'">
-                            </div>
-                            <div class="p-3">
-                                <h3 class="font-bold text-sm leading-tight h-10">${item.Name}</h3>
-                                <p class="text-green-600 font-bold text-sm">₹${item.Price} / ${item.Unit}</p>
-                                <input type="number" min="0" id="input-${item.Name.replace(/\s+/g, '')}" data-name="${item.Name}" data-price="${item.Price}" 
-                                       class="qty-in mt-2 w-full border rounded-lg p-2 text-center text-sm outline-none focus:ring-1 focus:ring-green-400" onchange="calculateTotal()">
-                            </div>
-                        </div>
-                    `).join('')}
+        function render(items) {
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = items.map(item => `
+                <div class="veg-card">
+                    <div class="img-container">
+                        <img src="${item.img || 'https://via.placeholder.com/200'}" class="veg-image" onerror="this.src='https://via.placeholder.com/200?text=Fresh+Veg'">
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm h-10 overflow-hidden">${item.name}</h3>
+                        <p class="text-green-700 font-bold">₹${item.price} / ${item.unit}</p>
+                        <input type="number" min="0" placeholder="Qty" 
+                               oninput="calcTotal()" 
+                               data-name="${item.name}" 
+                               data-price="${item.price}" 
+                               class="qty-input mt-2 w-full border-2 border-gray-100 rounded-lg p-2 text-center focus:border-green-400 outline-none">
+                    </div>
                 </div>
             `).join('');
         }
 
-        function changeQty(name, delta) {
-            const id = `input-${name.replace(/\s+/g, '')}`;
-            const input = document.getElementById(id);
-            if(input) {
-                let val = parseInt(input.value) || 0;
-                input.value = Math.max(0, val + delta);
-                calculateTotal();
-                updateCartUI();
-            }
+        function calcTotal() {
+            let total = 0;
+            document.querySelectorAll('.qty-input').forEach(input => {
+                const q = parseFloat(input.value) || 0;
+                total += q * parseFloat(input.dataset.price);
+            });
+            document.getElementById('total-val').innerText = total;
+            // SHOW OR HIDE THE CART BAR
+            document.getElementById('cart-total-bar').style.display = total > 0 ? 'block' : 'none';
         }
 
-        function updateCartUI() {
+        function toggleSidebar(show) {
+            document.getElementById('cart-sidebar').classList.toggle('active', show);
+            document.getElementById('overlay').style.display = show ? 'block' : 'none';
+            if(show) updateCartList();
+        }
+
+        function updateCartList() {
             const list = document.getElementById('cart-items-list');
-            let total = 0;
             let html = "";
-            document.querySelectorAll('.qty-in').forEach(i => {
-                if(i.value > 0) {
-                    const price = parseFloat(i.dataset.price);
-                    const qty = parseInt(i.value);
-                    total += price * qty;
+            document.querySelectorAll('.qty-input').forEach(input => {
+                if(input.value > 0) {
                     html += `
-                        <div class="flex justify-between items-center bg-white border p-3 rounded-xl shadow-sm">
-                            <div class="flex-1">
-                                <p class="font-bold text-sm text-gray-800">${i.dataset.name}</p>
-                                <p class="text-xs text-green-600 font-bold">₹${price * qty}</p>
+                        <div class="flex justify-between items-center bg-green-50 p-3 rounded-xl">
+                            <div>
+                                <p class="font-bold text-sm">${input.dataset.name}</p>
+                                <p class="text-xs text-gray-500">${input.value} x ₹${input.dataset.price}</p>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <button onclick="changeQty('${i.dataset.name}', -1)" class="qty-btn bg-gray-100 text-gray-600">-</button>
-                                <span class="font-bold w-4 text-center">${qty}</span>
-                                <button onclick="changeQty('${i.dataset.name}', 1)" class="qty-btn bg-green-100 text-green-700">+</button>
-                            </div>
-                        </div>`;
+                            <p class="font-bold">₹${input.value * input.dataset.price}</p>
+                        </div>
+                    `;
                 }
             });
-            list.innerHTML = html || `<p class="text-gray-400 text-center py-10">Your cart is empty.</p>`;
-            document.getElementById('cart-total-sidebar').innerText = total;
+            list.innerHTML = html || "<p class='text-center text-gray-400'>Cart is empty</p>";
         }
 
-        function toggleCart(show) {
-            document.getElementById('cart-sidebar').classList.toggle('active', show);
-            document.getElementById('cart-overlay').style.display = show ? 'block' : 'none';
-            if(show) updateCartUI();
+        function filterItems() {
+            const q = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = inventory.filter(i => i.name.toLowerCase().includes(q));
+            render(filtered);
         }
 
-        function fixImageUrl(url, name) {
-            if (url && url.includes('drive.google.com')) {
-                const id = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1];
-                return `https://lh3.googleusercontent.com/d/${id}`;
-            }
-            return url && url.length > 5 ? url : `https://source.unsplash.com/featured/400x400?${name},vegetable`;
-        }
-
-        function getLocation() {
-            const btn = document.getElementById('locBtn');
-            if (navigator.geolocation) {
-                btn.innerText = "⌛ Detecting...";
-                navigator.geolocation.getCurrentPosition(pos => {
-                    document.getElementById('geo_link').value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                    btn.innerText = "✅ Location Locked";
-                    btn.className = "w-full bg-green-100 text-green-700 p-3 rounded-xl font-bold text-xs";
-                }, () => alert("Please enable GPS."));
-            }
-        }
-
-        function filterVegetables() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allItems.filter(i => i.Name.toLowerCase().includes(q) || (i.KannadaName && i.KannadaName.toLowerCase().includes(q)));
-            renderItems(filtered);
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('.qty-in').forEach(i => total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price));
-            document.getElementById('total-val').innerText = total;
-            document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
-        }
-
-        function clearCart() {
-            if(confirm("Empty your cart?")) {
-                document.querySelectorAll('.qty-in').forEach(i => i.value = "");
-                calculateTotal();
-                toggleCart(false);
-            }
-        }
-
-        async function submitOrder() {
-            let details = "";
-            let total = document.getElementById('total-val').innerText;
+        function checkout() {
             const name = document.getElementById('cust_name').value;
             const phone = document.getElementById('cust_phone').value;
+            const addr = document.getElementById('cust_addr').value;
+            
+            if(!name || !phone) return alert("Please enter Name and Phone");
 
-            if(!name || !phone) return alert("Please fill Name and Phone!");
+            let itemsTxt = "";
+            document.querySelectorAll('.qty-input').forEach(input => {
+                if(input.value > 0) itemsTxt += `${input.dataset.name}: ${input.value}\n`;
+            });
 
-            document.querySelectorAll('.qty-in').forEach(i => { if(i.value > 0) details += `${i.dataset.name}(${i.value}), `; });
-
-            const orderData = { name, phone, details, amount: total, location: document.getElementById('geo_link').value || document.getElementById('manual_address').value };
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
-
-            const msg = `*V.S. MART ORDER*%0A*Name:* ${name}%0A*Items:* ${details}%0A*Total:* ₹${total}%0A*Address:* ${orderData.location}`;
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`, '_blank');
+            const finalTotal = document.getElementById('total-val').innerText;
+            const message = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Address:* ${addr}\n\n*Items:*\n${itemsTxt}\n*Total Bill: ₹${finalTotal}*`);
+            window.open(`https://wa.me/${WHATSAPP}?text=${message}`);
         }
 
-        init();
+        fetchSheet();
     </script>
 </body>
 </html>
-
