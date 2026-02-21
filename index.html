@@ -12,11 +12,10 @@
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000');
             background-size: cover; background-position: center; padding: 30px 20px; text-align: center; color: white;
         }
-        .veg-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; }
-        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; }
+        .veg-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; height: 100%; }
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; position: relative; }
         .veg-image { width: 100%; height: 100%; object-fit: cover; }
         
-        /* THE CART BAR */
         #cart-total-bar { 
             position: fixed; bottom: 0; left: 0; right: 0; 
             background: #064e3b; color: white; padding: 1.2rem; 
@@ -81,6 +80,22 @@
         const WHATSAPP = '919980764752';
         let inventory = [];
 
+        // ENHANCED DRIVE IMAGE FIXER
+        function getDirectImg(url) {
+            if (!url) return 'https://via.placeholder.com/300?text=Fresh+Vegetable';
+            if (url.includes('drive.google.com')) {
+                let id = "";
+                if (url.includes('id=')) {
+                    id = url.split('id=')[1].split('&')[0];
+                } else {
+                    id = url.split('/d/')[1].split('/')[0];
+                }
+                // Using the uc?id format which is more reliable for direct rendering
+                return `https://docs.google.com/uc?export=view&id=${id}`;
+            }
+            return url;
+        }
+
         async function fetchSheet() {
             try {
                 const response = await fetch(CSV_URL);
@@ -99,9 +114,7 @@
                 }).filter(item => item.name && item.stock !== 'out');
                 
                 render(inventory);
-            } catch (err) {
-                console.error("Could not load data", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function render(items) {
@@ -109,12 +122,13 @@
             grid.innerHTML = items.map(item => `
                 <div class="veg-card">
                     <div class="img-container">
-                        <img src="${item.img || 'https://via.placeholder.com/200'}" class="veg-image" onerror="this.src='https://via.placeholder.com/200?text=Fresh+Veg'">
+                        <img src="${getDirectImg(item.img)}" class="veg-image" 
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/300?text=${encodeURIComponent(item.name)}'">
                     </div>
                     <div class="p-3">
                         <h3 class="font-bold text-sm h-10 overflow-hidden">${item.name}</h3>
                         <p class="text-green-700 font-bold">₹${item.price} / ${item.unit}</p>
-                        <input type="number" step="0.01" min="0" placeholder="Qty (e.g. 0.5)" 
+                        <input type="number" step="0.25" min="0" placeholder="Qty (0.5, 1...)" 
                                oninput="calcTotal()" 
                                data-name="${item.name}" 
                                data-price="${item.price}" 
@@ -131,7 +145,6 @@
                 const q = parseFloat(input.value) || 0;
                 total += q * parseFloat(input.dataset.price);
             });
-            // Fixed to 2 decimal places for money
             document.getElementById('total-val').innerText = total.toFixed(2);
             document.getElementById('cart-total-bar').style.display = total > 0 ? 'block' : 'none';
         }
@@ -148,46 +161,17 @@
             document.querySelectorAll('.qty-input').forEach(input => {
                 const qty = parseFloat(input.value) || 0;
                 if(qty > 0) {
-                    const itemTotal = qty * parseFloat(input.dataset.price);
                     html += `
                         <div class="flex justify-between items-center bg-green-50 p-3 rounded-xl">
                             <div>
                                 <p class="font-bold text-sm">${input.dataset.name}</p>
                                 <p class="text-xs text-gray-500">${qty} ${input.dataset.unit} x ₹${input.dataset.price}</p>
                             </div>
-                            <p class="font-bold">₹${itemTotal.toFixed(2)}</p>
+                            <p class="font-bold">₹${(qty * input.dataset.price).toFixed(2)}</p>
                         </div>
                     `;
                 }
             });
             list.innerHTML = html || "<p class='text-center text-gray-400'>Cart is empty</p>";
         }
-
-        function filterItems() {
-            const q = document.getElementById('searchBox').value.toLowerCase();
-            const filtered = inventory.filter(i => i.name.toLowerCase().includes(q));
-            render(filtered);
-        }
-
-        function checkout() {
-            const name = document.getElementById('cust_name').value;
-            const phone = document.getElementById('cust_phone').value;
-            const addr = document.getElementById('cust_addr').value;
-            
-            if(!name || !phone) return alert("Please enter Name and Phone");
-
-            let itemsTxt = "";
-            document.querySelectorAll('.qty-input').forEach(input => {
-                const qty = parseFloat(input.value) || 0;
-                if(qty > 0) itemsTxt += `${input.dataset.name}: ${qty} ${input.dataset.unit}\n`;
-            });
-
-            const finalTotal = document.getElementById('total-val').innerText;
-            const message = encodeURIComponent(`*NEW ORDER - V.S. MART*\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Address:* ${addr}\n\n*Items:*\n${itemsTxt}\n*Total Bill: ₹${finalTotal}*`);
-            window.open(`https://wa.me/${WHATSAPP}?text=${message}`);
-        }
-
-        fetchSheet();
-    </script>
-</body>
-</html>
+        
