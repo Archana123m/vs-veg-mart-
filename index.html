@@ -6,213 +6,131 @@
     <title>V.S. Vegetable Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Hero section with a fresh vegetable background */
         .hero-bg {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover; background-position: center;
         }
-        .total-banner { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: #15803d; color: white; padding: 1.2rem; 
-            z-index: 9999; display: none;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-            text-align: center; font-weight: bold; cursor: pointer;
-        }
-        #cart-sidebar { 
-            position: fixed; right: -100%; top: 0; bottom: 0; 
-            width: 100%; max-width: 400px; background: white; 
-            z-index: 10000; transition: 0.3s; padding: 20px; 
-            box-shadow: -10px 0 30px rgba(0,0,0,0.2); 
-            overflow-y: auto;
-        }
+        .veg-card { border: 1px solid #f0f0f0; border-radius: 15px; background: white; transition: 0.3s; }
+        #cart-sidebar { position: fixed; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 400px; background: white; z-index: 1000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         #cart-sidebar.active { right: 0; }
-        .veg-card { border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: white; transition: 0.2s; }
-        .veg-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .qty-input:focus { border-color: #15803d; ring: 2px; ring-color: #dcfce7; }
     </style>
 </head>
-<body class="bg-gray-50 pb-24">
+<body class="bg-gray-50 pb-20">
 
-    <header class="hero-bg text-white p-8 md:p-12 text-center shadow-lg">
-        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-2">V.S. VEGETABLE MART</h1>
-        <p class="text-green-300 text-lg md:text-xl font-medium italic mb-4">
-            "Farm fresh Vegetables are provided for all kind of occasions"
-        </p>
-        <div class="flex flex-col items-center gap-2">
-            <span class="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full font-bold text-lg border border-white/30">
-                📞 9980764752
-            </span>
-            <p class="text-sm text-gray-300 uppercase tracking-widest">Devanahalli Town, Bangalore</p>
-        </div>
+    <header class="hero-bg text-white p-8 text-center">
+        <h1 class="text-3xl font-bold tracking-tight">V.S. VEGETABLE MART</h1>
+        <p class="text-green-300 italic text-sm mt-2">"Farm fresh Vegetables are provided for all kind of occasions"</p>
+        <div class="mt-4 font-bold text-lg">📞 9980764752</div>
     </header>
 
-    <div class="p-4 max-w-4xl mx-auto sticky top-0 bg-gray-50/90 backdrop-blur-sm z-40">
-        <input type="text" id="searchInput" onkeyup="filterVeg()" placeholder="Search vegetables (e.g. Potato, Onion)..." class="w-full p-4 border-2 border-green-100 rounded-xl shadow-sm focus:border-green-600 outline-none transition-all">
+    <div class="p-4 sticky top-0 bg-gray-50/95 z-50">
+        <input type="text" id="searchInput" onkeyup="filterVeg()" placeholder="Search vegetables (English)..." 
+               class="w-full p-4 border-2 border-green-100 rounded-2xl shadow-sm outline-none focus:border-green-600">
     </div>
 
-    <main id="shop-container" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto"></main>
+    <main id="shop-container" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto"></main>
 
-    <div id="cart-total" class="total-banner" onclick="toggleCart(true)">
-        <div class="flex justify-between items-center px-4 max-w-4xl mx-auto">
-            <span class="text-lg uppercase tracking-wide">Review Order 🛒</span>
-            <span class="text-xl">Total: ₹<span id="total-val">0</span></span>
-        </div>
+    <div id="cart-total" class="fixed bottom-0 left-0 right-0 bg-green-800 text-white p-5 text-center font-bold hidden cursor-pointer shadow-2xl z-50" onclick="toggleCart(true)">
+        REVIEW ORDER & TOTAL: ₹<span id="total-val">0</span>
     </div>
 
-    <div id="cart-sidebar">
+    <div id="cart-sidebar" class="p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h2 class="font-bold text-2xl text-green-800">Your Basket</h2>
-            <button onclick="toggleCart(false)" class="text-3xl text-gray-400 hover:text-black">&times;</button>
+            <h2 class="font-bold text-2xl">Your Basket</h2>
+            <button onclick="toggleCart(false)" class="text-3xl">&times;</button>
         </div>
-        <div id="cart-list" class="space-y-3 mb-8"></div>
-        
-        <div class="border-t pt-6 space-y-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">Your Name</label>
-                <input type="text" id="cust_name" placeholder="Enter Full Name" class="w-full p-3 border rounded-lg focus:ring-2 ring-green-500 outline-none">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-600 mb-1">WhatsApp Number</label>
-                <input type="tel" id="cust_phone" placeholder="Enter Mobile Number" class="w-full p-3 border rounded-lg focus:ring-2 ring-green-500 outline-none">
-            </div>
-            <button onclick="sendOrder()" class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition-transform active:scale-95">
-                ORDER VIA WHATSAPP
-            </button>
+        <div id="cart-list" class="space-y-4 mb-8"></div>
+        <div class="space-y-4">
+            <input type="text" id="cust_name" placeholder="Enter Your Name" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+            <input type="tel" id="cust_phone" placeholder="WhatsApp Number" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500">
+            <button onclick="sendOrder()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition">ORDER ON WHATSAPP</button>
         </div>
     </div>
 
     <script>
-        // Data Configuration
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSombdppmWqAYqrvhAFj7P1Samea_9O1i2sJyU1EsLhiPsuS1T6KaW4QiVlV1XN08xSGzX8fNL7kZqU/pub?output=csv';
         const WHATSAPP_NUM = '919980764752';
         let allItems = [];
 
-        // Converts Google Drive share links into direct image URLs
         function formatDriveUrl(url) {
-            if (!url || url.trim() === "") return 'https://via.placeholder.com/300x300?text=Fresh+Veggie';
-            if (url.includes('drive.google.com')) {
-                let id = "";
-                if (url.includes('id=')) {
-                    id = url.split('id=')[1].split('&')[0];
-                } else {
-                    id = url.split('/d/')[1].split('/')[0];
-                }
-                return `https://docs.google.com/uc?export=view&id=${id}`;
-            }
-            return url;
+            if (!url || !url.includes('drive.google.com')) return url || 'https://via.placeholder.com/300?text=No+Image';
+            try {
+                // Extracts the ID regardless of link format (sharing link or direct link)
+                const parts = url.split(/\/d\/|id=/);
+                const id = parts[1].split(/[/?&]/)[0];
+                return `https://lh3.googleusercontent.com/u/0/d/${id}=w400-h400-p`;
+            } catch (e) { return url; }
         }
 
         async function loadData() {
             try {
-                const response = await fetch(SHEET_URL);
-                const data = await response.text();
-                const rows = data.split(/\r?\n/).filter(row => row.trim() !== "").slice(1);
+                const res = await fetch(SHEET_URL);
+                const csv = await res.text();
+                const rows = csv.split(/\r?\n/).filter(r => r.trim()).slice(1);
                 
                 allItems = rows.map(row => {
-                    // Splitting by comma, handling basic CSV format
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
-                    return { 
-                        name: cols[0]?.replace(/"/g, '').trim(), // English Name from Column A
-                        price: parseFloat(cols[2]) || 0,        // Price from Column C
-                        unit: cols[3]?.trim() || 'kg',          // Unit from Column D
-                        img: formatDriveUrl(cols[5]?.trim()),   // Image Link from Column F
-                        stock: cols[7]?.trim().toLowerCase()    // Stock Status from Column H
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    return {
+                        name: cols[0]?.replace(/"/g, '').trim(), // English Name (Column A)
+                        price: parseFloat(cols[2]) || 0,        // Price (Column C)
+                        unit: cols[3]?.trim() || 'kg',          // Unit (Column D)
+                        img: formatDriveUrl(cols[5]?.trim()),   // Image (Column F)
+                        stock: cols[7]?.trim().toLowerCase()    // Stock (Column H)
                     };
                 }).filter(i => i.name && i.stock !== 'out');
                 
                 render(allItems);
-            } catch (e) {
-                console.error("CSV Load Error:", e);
-                document.getElementById('shop-container').innerHTML = "<p class='col-span-full text-center py-10 text-red-500'>Error loading vegetables. Please check your data source.</p>";
-            }
+            } catch (e) { alert("Error loading shop data."); }
         }
 
         function render(items) {
             const container = document.getElementById('shop-container');
             container.innerHTML = items.map(item => `
-                <div class="veg-card p-3 shadow-sm">
-                    <div class="relative h-32 md:h-40 mb-3 overflow-hidden rounded-lg bg-gray-100">
-                        <img src="${item.img}" 
-                             alt="${item.name}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.src='https://via.placeholder.com/300x300?text=Vegetable'">
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-sm md:text-base mb-1 truncate">${item.name}</h3>
-                    <p class="text-green-700 font-bold text-lg mb-3">₹${item.price}<span class="text-xs text-gray-500 font-normal"> / ${item.unit}</span></p>
-                    <input type="number" min="0" placeholder="Qty" 
-                           oninput="updateTotal()" 
-                           data-name="${item.name}" 
-                           data-price="${item.price}" 
-                           class="qty-input w-full border border-gray-200 p-2 text-center rounded-lg outline-none transition-colors">
+                <div class="veg-card p-3 shadow-sm flex flex-col">
+                    <img src="${item.img}" class="w-full h-32 object-cover rounded-xl mb-3 bg-gray-100" 
+                         onerror="this.src='https://via.placeholder.com/300?text=Vegetable'">
+                    <h3 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h3>
+                    <p class="text-green-700 font-bold mb-3 text-lg">₹${item.price}<span class="text-xs text-gray-400 font-normal">/${item.unit}</span></p>
+                    <input type="number" min="0" placeholder="Qty" oninput="updateTotal()" 
+                           data-name="${item.name}" data-price="${item.price}" 
+                           class="qty-input w-full border border-gray-100 p-2 text-center rounded-lg outline-none focus:border-green-500">
                 </div>
             `).join('');
         }
 
         function updateTotal() {
             let total = 0;
-            document.querySelectorAll('.qty-input').forEach(input => {
-                total += (parseFloat(input.value) || 0) * parseFloat(input.dataset.price);
-            });
+            document.querySelectorAll('.qty-input').forEach(i => total += (parseFloat(i.value) || 0) * parseFloat(i.dataset.price));
             document.getElementById('total-val').innerText = total.toFixed(2);
             document.getElementById('cart-total').style.display = total > 0 ? 'block' : 'none';
         }
 
-        function toggleCart(open) {
-            const sidebar = document.getElementById('cart-sidebar');
-            sidebar.classList.toggle('active', open);
-            if(open) {
-                let html = "";
-                document.querySelectorAll('.qty-input').forEach(input => {
-                    if(parseFloat(input.value) > 0) {
-                        const lineTotal = (input.value * input.dataset.price).toFixed(2);
-                        html += `
-                        <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-100">
-                            <div>
-                                <p class="font-bold text-gray-800">${input.dataset.name}</p>
-                                <p class="text-xs text-gray-500">Qty: ${input.value} &times; ₹${input.dataset.price}</p>
-                            </div>
-                            <span class="font-bold text-green-700">₹${lineTotal}</span>
-                        </div>`;
-                    }
-                });
-                document.getElementById('cart-list').innerHTML = html || "<p class='text-center text-gray-400 py-10'>Your basket is empty</p>";
-            }
+        function toggleCart(show) { document.getElementById('cart-sidebar').classList.toggle('active', show); if(show) updateCartList(); }
+
+        function updateCartList() {
+            let html = "";
+            document.querySelectorAll('.qty-input').forEach(i => {
+                if(parseFloat(i.value) > 0) {
+                    html += `<div class="flex justify-between border-b pb-2"><span>${i.dataset.name} x ${i.value}</span><b>₹${(i.value * i.dataset.price).toFixed(2)}</b></div>`;
+                }
+            });
+            document.getElementById('cart-list').innerHTML = html || "Basket is empty";
         }
 
         function sendOrder() {
-            const name = document.getElementById('cust_name').value.trim();
-            const phone = document.getElementById('cust_phone').value.trim();
-            
-            if(!name || !phone) {
-                alert("Please fill in your Name and Phone Number.");
-                return;
-            }
-            
-            let itemLines = "";
-            let finalTotal = document.getElementById('total-val').innerText;
-            
-            document.querySelectorAll('.qty-input').forEach(i => {
-                if(parseFloat(i.value) > 0) {
-                    itemLines += `✅ ${i.dataset.name}: ${i.value}\n`;
-                }
-            });
-            
-            const message = `*NEW ORDER - V.S. VEGETABLE MART*\n\n` +
-                            `👤 *Customer:* ${name}\n` +
-                            `📞 *Phone:* ${phone}\n\n` +
-                            `*ORDERED ITEMS:*\n${itemLines}\n` +
-                            `💰 *TOTAL AMOUNT: ₹${finalTotal}*\n\n` +
-                            `_Please confirm this order._`;
-                            
-            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(message)}`);
+            const name = document.getElementById('cust_name').value;
+            const phone = document.getElementById('cust_phone').value;
+            if(!name || !phone) return alert("Please enter Name and Phone Number");
+            let items = "";
+            document.querySelectorAll('.qty-input').forEach(i => { if(i.value > 0) items += `• ${i.dataset.name}: ${i.value}\n`; });
+            const msg = encodeURIComponent(`*ORDER - V.S. VEGETABLE MART*\n\nName: ${name}\nPhone: ${phone}\n\n*Items:*\n${items}\n*Total: ₹${document.getElementById('total-val').innerText}*`);
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${msg}`);
         }
 
         function filterVeg() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allItems.filter(item => item.name.toLowerCase().includes(query));
-            render(filtered);
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            render(allItems.filter(i => i.name.toLowerCase().includes(q)));
         }
 
         loadData();
